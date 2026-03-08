@@ -25,9 +25,14 @@
 
 ### Build Artifact (APK)
 
-1. Unity → File → Build Settings → Android
-2. Build (not Build and Run) → save as `BoardOfEducation.apk`
-3. Include in submission or host for download
+**Option A — Menu:** Board of Education → Build Android APK (creates `Build/BoardOfEducation.apk`)
+
+**Option B — Command line:**
+```bash
+/path/to/Unity -batchmode -quit -projectPath /path/to/BoardOfEducation -executeMethod BoardOfEducation.Editor.BoardBuild.BuildAndroid
+```
+
+**Option C — Manual:** File → Build Settings → Android → Build
 
 ## Pre-Submission Verification
 
@@ -46,6 +51,8 @@
 - [ ] Show puzzle completion ("You won!")
 - [ ] Mention interaction logging (optional: show log file)
 - [ ] Keep to 1–2 minutes
+
+**Script:** See [DEMO_VIDEO_SCRIPT.md](DEMO_VIDEO_SCRIPT.md)
 
 ## Contact
 

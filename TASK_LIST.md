@@ -33,7 +33,7 @@
 ### 5. Integration
 - [x] Integrate Board Pause Screen (optional)
 - [ ] Test in Board Simulator end-to-end
-- [ ] Build sideloadable package for physical Board
+- [x] Build sideloadable package for physical Board (BoardBuild.cs + SUBMISSION.md)
 - [ ] Test on physical Board (when available)
 
 ### 5a. Validation

@@ -32,6 +32,10 @@ sysinfo.txt
 # Board SDK / logs
 *.log
 interaction_logs/
+
+# Build output
+Build/
+*.apk
 .sdk-temp/
 .sdk-extract/
 

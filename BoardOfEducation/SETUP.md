@@ -2,7 +2,7 @@
 
 ## 1. Unity & Project
 
-1. Install **Unity 2021.3 LTS** (2021.3.52f1 or later).
+1. Install **Unity 2021.3 LTS** (2021.3.56f2 recommended — security-patched).
 2. Open **Unity Hub** → Add → select `BoardOfEducation` folder.
 3. Wait for package resolution (Board SDK, Input System).
 

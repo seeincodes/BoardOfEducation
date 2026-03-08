@@ -10,14 +10,14 @@ A 2-player collaborative coding logic puzzle for the Board.fun physical-digital 
 
 ## Quick Start
 
-1. **Install Unity 2021.3** (2021.3.52f1 or later)
+1. **Install Unity 2021.3** (2021.3.56f2 recommended — security-patched)
 2. **Open project** — Unity Hub → Add → Select `BoardOfEducation` folder
 3. **Wait for import** — Unity resolves Board SDK, Input System
 4. **Import Input sample** — Package Manager → fun.board → Samples → Import "Input"
 5. **Create game scene** — New Scene → Add GameObject with `GameManager` + `PuzzleFeedbackUI` → Save as `Assets/Scenes/Game.unity`
 6. **Press Play** — Run in Editor with Board Simulator
 
-See [SETUP.md](SETUP.md) for detailed setup.
+See [SETUP.md](SETUP.md) for detailed setup. First-time Unity setup: [UNITY_SETUP_CHECKLIST.md](UNITY_SETUP_CHECKLIST.md).
 
 ## Usage
 
