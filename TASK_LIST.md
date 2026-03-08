@@ -31,16 +31,16 @@
 - [x] Generate sample log from one gameplay session
 
 ### 5. Integration
-- [ ] Integrate Board Pause Screen (optional)
+- [x] Integrate Board Pause Screen (optional)
 - [ ] Test in Board Simulator end-to-end
 - [ ] Test on physical Board (when available)
 
 ## Phase 2: Polish
 
 ### 6. UX & Feedback
-- [ ] Add clear visual/audio feedback for correct/incorrect moves
-- [ ] Improve onboarding for age 6+ (simple instructions)
-- [ ] Polish UI for readability and accessibility
+- [x] Add clear visual/audio feedback for correct/incorrect moves
+- [x] Improve onboarding for age 6+ (simple instructions)
+- [x] Polish UI for readability and accessibility
 
 ### 7. Documentation
 - [x] Write comprehensive README (setup, usage, build, sideload)

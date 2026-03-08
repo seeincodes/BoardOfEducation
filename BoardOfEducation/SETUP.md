@@ -16,10 +16,16 @@
 
 1. File → New Scene.
 2. Create empty GameObject → name it `GameController`.
-3. Add components: `GameManager`, `PuzzleFeedbackUI`.
-4. (Optional) Create Canvas with Text, assign to PuzzleFeedbackUI's Feedback Text.
-5. Save scene as `Assets/Scenes/Game.unity`.
-6. File → Build Settings → Add Open Scenes.
+3. Add components: `GameManager`, `PuzzleFeedbackUI`, `InstructionsUI`.
+4. **Canvas setup (recommended):**
+   - Create UI → Canvas (Screen Space - Overlay).
+   - Add UI → Text as child → name "FeedbackText" (font size 32+).
+   - Add UI → Image as sibling → name "FeedbackBackground" (semi-transparent).
+   - Assign FeedbackText and FeedbackBackground to PuzzleFeedbackUI.
+5. **Instructions:** Create Panel with Text ("Place pieces in order! Work together!") → assign to InstructionsUI.
+6. Assign InstructionsUI reference to GameManager (optional).
+7. Save scene as `Assets/Scenes/Game.unity`.
+8. File → Build Settings → Add Open Scenes.
 
 ## 4. Puzzle Config (Optional)
 
@@ -37,7 +43,11 @@ If no config is assigned, defaults (0,1,2,3) are used.
 2. Window → Board → Simulator (if available) to simulate piece input.
 3. Press Play.
 
-## 6. Log Output
+## 6. Board Pause Screen
+
+On physical Board, the system pause screen shows "Board of Education". Configured in GameManager.Start(). No extra setup needed.
+
+## 7. Log Output
 
 Interaction logs are written to:
 - **Editor:** `~/Library/Application Support/DefaultCompany/BoardOfEducation/interaction_logs/`

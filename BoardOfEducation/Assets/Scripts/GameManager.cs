@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Board.Core;
 using Board.Input;
 using UnityEngine;
 
@@ -17,6 +18,7 @@ namespace BoardOfEducation
     {
         [SerializeField] private PuzzleConfig puzzleConfig;
         [SerializeField] private bool logFingerTouches = false;
+        [SerializeField] private InstructionsUI instructionsUI;
 
         public event Action<int, int, bool> OnPiecePlaced;   // slotIndex, glyphId, correct
         public event Action OnPuzzleSolved;
@@ -31,6 +33,12 @@ namespace BoardOfEducation
         {
             _logger = new InteractionLogger(null);
             _logger.LogSystem("session_start", "game_initialized");
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+            BoardApplication.SetPauseScreenContext(applicationName: "Board of Education", showSaveOptionUponExit: false);
+#endif
+
+            if (instructionsUI == null) instructionsUI = GetComponent<InstructionsUI>();
 
             var config = puzzleConfig != null ? puzzleConfig : CreateDefaultConfig();
             _puzzle = new SequencePuzzle(config);
@@ -50,6 +58,7 @@ namespace BoardOfEducation
         {
             var correct = _puzzle.IsSlotCorrect(slotIndex);
             _gameState = correct ? $"slot_{slotIndex}_correct" : $"slot_{slotIndex}_incorrect";
+            instructionsUI?.Hide();
             OnPiecePlaced?.Invoke(slotIndex, glyphId, correct);
         }
 
