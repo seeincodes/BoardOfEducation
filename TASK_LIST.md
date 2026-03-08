@@ -24,7 +24,7 @@
 
 ### 4. Interaction Logging
 - [x] Create InteractionLogger service (CSV writer)
-- [x] Log schema: timestamp, session_id, player_id, piece_id, action, position, rotation, game_state
+- [x] Log schema: timestamp, session_id, player_id, piece_id, action, position, rotation, game_state, level_id, concept_type
 - [x] Hook piece placement events to logger
 - [x] Hook piece rotation events to logger
 - [x] Write to local file (e.g., `Application.persistentDataPath`)
@@ -56,7 +56,7 @@
 ### 8. Optional Enhancements
 - [ ] Integrate Board Save Games for session persistence (deferred)
 - [x] Add simple tutorial or first-run guidance (InstructionsUI)
-- [x] Add multi-round puzzle support (3 rounds default, configurable) for 5–15 min sessions
+- [x] Add multi-round puzzle support (replaced by level system in §11)
 
 ### 11. Level System
 - [x] Create LevelConfig ScriptableObject and ConceptType enum
