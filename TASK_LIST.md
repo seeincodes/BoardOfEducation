@@ -37,9 +37,9 @@
 - [ ] Test on physical Board (when available)
 
 ### 5a. Validation
-- [ ] Verify session/player ID distinction works across multiple players on the same Board
-- [ ] Verify game session length falls within 5–15 minute target
-- [ ] Verify 100% of piece placements/rotations are captured in the interaction log
+- [x] Verify session/player ID distinction works across multiple players on the same Board
+- [x] Verify game session length falls within 5–15 minute target
+- [x] Verify 100% of piece placements/rotations are captured in the interaction log
 
 ## Phase 2: Polish
 
@@ -56,6 +56,7 @@
 ### 8. Optional Enhancements
 - [ ] Integrate Board Save Games for session persistence (deferred)
 - [x] Add simple tutorial or first-run guidance (InstructionsUI)
+- [x] Add multi-round puzzle support (3 rounds default, configurable) for 5–15 min sessions
 
 ## Phase 3: Final
 

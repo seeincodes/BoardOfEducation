@@ -113,6 +113,19 @@ namespace BoardOfEducation
             return true;
         }
 
+        /// <summary>
+        /// Reset puzzle state for a new round. Clears all slots and marks unsolved.
+        /// </summary>
+        public void Reset()
+        {
+            _solved = false;
+            for (var i = 0; i < _config.SlotCount; i++)
+            {
+                _slotOccupancy[i] = -1;
+                _slotFilled[i] = false;
+            }
+        }
+
         public bool IsSolved => _solved;
         public int SlotCount => _config.SlotCount;
     }

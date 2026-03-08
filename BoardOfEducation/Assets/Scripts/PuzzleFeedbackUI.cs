@@ -40,6 +40,7 @@ namespace BoardOfEducation
             {
                 _gameManager.OnPiecePlaced += OnPiecePlaced;
                 _gameManager.OnPuzzleSolved += OnPuzzleSolved;
+                _gameManager.OnRoundStarted += OnRoundStarted;
             }
         }
 
@@ -49,6 +50,7 @@ namespace BoardOfEducation
             {
                 _gameManager.OnPiecePlaced -= OnPiecePlaced;
                 _gameManager.OnPuzzleSolved -= OnPuzzleSolved;
+                _gameManager.OnRoundStarted -= OnRoundStarted;
             }
         }
 
@@ -76,6 +78,13 @@ namespace BoardOfEducation
             var message = "You won! Great job!";
             ShowFeedback(message, winColor);
             PlaySound(winClip);
+            Debug.Log($"[Order Up!] {message}");
+        }
+
+        private void OnRoundStarted(int currentRound, int totalRounds)
+        {
+            var message = $"Round {currentRound} of {totalRounds} — Go!";
+            ShowFeedback(message, correctColor);
             Debug.Log($"[Order Up!] {message}");
         }
 

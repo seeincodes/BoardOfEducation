@@ -19,15 +19,20 @@ namespace BoardOfEducation
         [SerializeField] private PuzzleConfig puzzleConfig;
         [SerializeField] private bool logFingerTouches = false;
         [SerializeField] private InstructionsUI instructionsUI;
+        [SerializeField] private int totalRounds = 3;
+        [SerializeField] private float nextRoundDelay = 3f;
 
         public event Action<int, int, bool> OnPiecePlaced;   // slotIndex, glyphId, correct
         public event Action OnPuzzleSolved;
+        public event Action<int, int> OnRoundStarted;        // currentRound, totalRounds
 
         private InteractionLogger _logger;
         private SequencePuzzle _puzzle;
         private readonly Dictionary<int, BoardContact> _previousContacts = new Dictionary<int, BoardContact>();
         private readonly Dictionary<int, int> _contactToSlot = new Dictionary<int, int>();
         private string _gameState = "puzzle_active";
+        private int _currentRound = 1;
+        private float _nextRoundTimer = -1f;
 
         private void Start()
         {
@@ -64,13 +69,43 @@ namespace BoardOfEducation
 
         private void OnPuzzleSolvedInternal()
         {
-            _gameState = "puzzle_solved";
+            _gameState = $"puzzle_solved_round_{_currentRound}";
             _logger?.LogSystem("puzzle_complete", _gameState);
             OnPuzzleSolved?.Invoke();
+
+            if (_currentRound < totalRounds)
+            {
+                _nextRoundTimer = nextRoundDelay;
+            }
+            else
+            {
+                _gameState = "all_rounds_complete";
+                _logger?.LogSystem("all_rounds_complete", _gameState);
+            }
+        }
+
+        private void StartNextRound()
+        {
+            _currentRound++;
+            _previousContacts.Clear();
+            _contactToSlot.Clear();
+            _puzzle.Reset();
+            _gameState = $"puzzle_active_round_{_currentRound}";
+            _logger?.LogSystem("round_start", _gameState);
+            OnRoundStarted?.Invoke(_currentRound, totalRounds);
+            Debug.Log($"[Order Up!] Round {_currentRound}/{totalRounds}");
         }
 
         private void Update()
         {
+            if (_nextRoundTimer > 0)
+            {
+                _nextRoundTimer -= Time.deltaTime;
+                if (_nextRoundTimer <= 0)
+                    StartNextRound();
+                return; // pause input during round transition
+            }
+
             foreach (var contact in BoardInput.GetActiveContacts(BoardContactType.Glyph))
             {
                 ProcessGlyphContact(contact);
