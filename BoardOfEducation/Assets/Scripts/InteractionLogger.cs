@@ -4,16 +4,14 @@ using UnityEngine;
 
 namespace BoardOfEducation
 {
-    /// <summary>
-    /// Logs piece interactions to a CSV file for learning analytics.
-    /// Schema: timestamp, session_id, player_id, piece_id, action, position, rotation, game_state
-    /// </summary>
     public class InteractionLogger
     {
         private readonly string _sessionId;
         private readonly string _logPath;
         private readonly StreamWriter _writer;
         private bool _headerWritten;
+        private int _levelId;
+        private string _conceptType = "";
 
         public InteractionLogger(string sessionId)
         {
@@ -25,27 +23,27 @@ namespace BoardOfEducation
             _headerWritten = false;
         }
 
-        /// <summary>
-        /// Log a piece interaction.
-        /// </summary>
+        public void SetLevel(int levelId, ConceptType conceptType)
+        {
+            _levelId = levelId;
+            _conceptType = conceptType.ToString().ToLowerInvariant();
+        }
+
         public void Log(string playerId, string pieceId, string action, Vector2 position, float orientationDegrees, string gameState)
         {
             EnsureHeader();
             var timestamp = DateTime.UtcNow.ToString("o");
             var posStr = EscapeCsv($"{position.x:F1},{position.y:F1}");
-            var line = $"{timestamp},{_sessionId},{playerId},{pieceId},{action},{posStr},{orientationDegrees:F1},{EscapeCsv(gameState)}";
+            var line = $"{timestamp},{_sessionId},{playerId},{pieceId},{action},{posStr},{orientationDegrees:F1},{EscapeCsv(gameState)},{_levelId},{_conceptType}";
             _writer.WriteLine(line);
             _writer.Flush();
         }
 
-        /// <summary>
-        /// Log a system event (e.g., session start, puzzle complete).
-        /// </summary>
         public void LogSystem(string action, string gameState)
         {
             EnsureHeader();
             var timestamp = DateTime.UtcNow.ToString("o");
-            var line = $"{timestamp},{_sessionId},system,_,{action},_,_,{EscapeCsv(gameState)}";
+            var line = $"{timestamp},{_sessionId},system,_,{action},_,_,{EscapeCsv(gameState)},{_levelId},{_conceptType}";
             _writer.WriteLine(line);
             _writer.Flush();
         }
@@ -53,11 +51,10 @@ namespace BoardOfEducation
         private void EnsureHeader()
         {
             if (_headerWritten) return;
-            _writer.WriteLine("timestamp,session_id,player_id,piece_id,action,position,rotation,game_state");
+            _writer.WriteLine("timestamp,session_id,player_id,piece_id,action,position,rotation,game_state,level_id,concept_type");
             _headerWritten = true;
         }
 
-        /// <summary>Escapes CSV fields containing comma, quote, or newline.</summary>
         private static string EscapeCsv(string value)
         {
             if (string.IsNullOrEmpty(value)) return "";
