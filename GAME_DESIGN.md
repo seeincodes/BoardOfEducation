@@ -76,6 +76,23 @@ LightBot is icon-based, all-ages friendly, and used by millions of kids and teac
 - **Loops:** A "repeat" piece that means "do this twice."
 - **Conditionals:** Pieces with branching (e.g., "if morning, do X").
 
+## Level Progression
+
+The game features **14 levels** spanning **4 coding concepts**, inspired by LightBot's proven pedagogical progression:
+
+| Concept | Levels | Description |
+|---------|--------|-------------|
+| Sequencing | 1–5 | Place commands in the correct order |
+| Procedures | 6–8 | Group repeated steps into reusable blocks |
+| Loops | 9–11 | Identify and apply repeating patterns |
+| Conditionals | 12–14 | Choose different actions based on conditions |
+
+**Tutorial flow:** Levels 1–3 serve as guided tutorials that auto-advance on completion, introducing core mechanics step by step. After completing the tutorial, players unlock **free play** mode with access to the level select screen.
+
+**Level select screen:** Levels are grouped by concept. Locked levels display a lock icon; completed levels show a checkmark. Players can replay any unlocked level. New concepts unlock after completing all levels in the previous concept group.
+
+Each level is defined by a `LevelConfig` ScriptableObject and validated by a concept-specific `IPuzzleValidator` implementation. For full design details, see [`docs/plans/2026-03-08-level-system-design.md`](docs/plans/2026-03-08-level-system-design.md).
+
 ## Win Condition
 
 All pieces in correct slots → `OnPuzzleSolved()` → log `puzzle_complete` → show win UI.

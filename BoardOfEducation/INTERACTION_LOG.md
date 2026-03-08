@@ -20,6 +20,8 @@ Example: `session_a1b2c3d4_20260308_200001.csv`
 | position | string | `"x,y"` in screen pixels, quoted (empty for system events) |
 | rotation | string | Degrees (empty for system events) |
 | game_state | string | Snapshot at interaction time |
+| level_id | int | Current level number (0 for system events outside a level) |
+| concept_type | string | Coding concept: `sequence`, `procedure`, `loop`, `conditional` (empty for non-level events) |
 
 ## Actions
 
@@ -30,6 +32,10 @@ Example: `session_a1b2c3d4_20260308_200001.csv`
 | rotate | Piece rotated |
 | lift | Piece lifted from board (Ended/Canceled) |
 | session_start | Game session began |
+| level_start | A new level has been loaded and is active |
+| level_complete | Current level was solved |
+| level_select | Player selected a level from the level select screen |
+| concept_unlocked | A new concept category was unlocked |
 | puzzle_complete | Puzzle solved |
 | session_end | Game session ended |
 

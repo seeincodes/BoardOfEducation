@@ -58,6 +58,16 @@
 - [x] Add simple tutorial or first-run guidance (InstructionsUI)
 - [x] Add multi-round puzzle support (3 rounds default, configurable) for 5–15 min sessions
 
+### 11. Level System
+- [x] Create LevelConfig ScriptableObject and ConceptType enum
+- [x] Implement IPuzzleValidator interface with 4 validators (Sequence, Procedure, Loop, Conditional)
+- [x] Create LevelManager for progression and unlock state
+- [x] Refactor GameManager to use validators + LevelManager
+- [x] Create LevelSelectUI for level selection
+- [x] Add level_id and concept_type to interaction logger
+- [x] Design 14 levels across 4 coding concepts
+- [x] Update documentation and sample CSV
+
 ## Phase 3: Final
 
 ### 9. Demo & Submission
