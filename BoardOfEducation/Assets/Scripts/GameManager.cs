@@ -2,37 +2,30 @@ using System;
 using System.Collections.Generic;
 using Board.Core;
 using Board.Input;
+using BoardOfEducation.Validators;
 using UnityEngine;
 
 namespace BoardOfEducation
 {
-    /// <summary>
-    /// Main game controller. Polls Board contacts (glyphs = pieces), logs interactions,
-    /// and runs the Order Up! sequence puzzle validation.
-    /// </summary>
-    /// <remarks>
-    /// - Player assignment: left half of screen = player_1, right half = player_2
-    /// - Subscribes to SequencePuzzle events for OnPiecePlaced and OnPuzzleSolved
-    /// </remarks>
     public class GameManager : MonoBehaviour
     {
-        [SerializeField] private PuzzleConfig puzzleConfig;
+        [SerializeField] private LevelManager levelManager;
         [SerializeField] private bool logFingerTouches = false;
         [SerializeField] private InstructionsUI instructionsUI;
-        [SerializeField] private int totalRounds = 3;
-        [SerializeField] private float nextRoundDelay = 3f;
 
-        public event Action<int, int, bool> OnPiecePlaced;   // slotIndex, glyphId, correct
+        public event Action<int, int, bool> OnPiecePlaced;
         public event Action OnPuzzleSolved;
-        public event Action<int, int> OnRoundStarted;        // currentRound, totalRounds
+        public event Action<LevelConfig> OnLevelStarted;
+        public event Action<LevelConfig> OnLevelCompleted;
+        public event Action OnShowLevelSelect;
 
         private InteractionLogger _logger;
-        private SequencePuzzle _puzzle;
+        private IPuzzleValidator _validator;
         private readonly Dictionary<int, BoardContact> _previousContacts = new Dictionary<int, BoardContact>();
         private readonly Dictionary<int, int> _contactToSlot = new Dictionary<int, int>();
-        private string _gameState = "puzzle_active";
-        private int _currentRound = 1;
-        private float _nextRoundTimer = -1f;
+        private string _gameState = "initializing";
+        private bool _inputEnabled;
+        private float _levelCompleteTimer = -1f;
 
         private void Start()
         {
@@ -42,69 +35,84 @@ namespace BoardOfEducation
 #if UNITY_ANDROID && !UNITY_EDITOR
             BoardApplication.SetPauseScreenContext(applicationName: "Board of Education", showSaveOptionUponExit: false);
 #endif
-
             if (instructionsUI == null) instructionsUI = GetComponent<InstructionsUI>();
+            if (levelManager == null) levelManager = GetComponent<LevelManager>();
 
-            var config = puzzleConfig != null ? puzzleConfig : CreateDefaultConfig();
-            _puzzle = new SequencePuzzle(config);
-            _puzzle.OnPiecePlaced += OnPuzzlePiecePlaced;
-            _puzzle.OnPuzzleSolved += OnPuzzleSolvedInternal;
+            levelManager.OnLevelStarted += HandleLevelStarted;
+            levelManager.OnLevelCompleted += HandleLevelCompleted;
+            levelManager.OnShowLevelSelect += HandleShowLevelSelect;
+
+            levelManager.StartGame();
         }
 
-        private static PuzzleConfig CreateDefaultConfig()
+        private void HandleLevelStarted(LevelConfig config)
         {
-            var config = ScriptableObject.CreateInstance<PuzzleConfig>();
-            config.expectedGlyphOrder = new[] { 0, 1, 2, 3 };
-            config.taskDescription = "Get ready for school!";
-            return config;
+            // Clean up previous validator
+            if (_validator != null)
+            {
+                _validator.OnPiecePlaced -= OnValidatorPiecePlaced;
+                _validator.OnPuzzleSolved -= OnValidatorPuzzleSolved;
+            }
+
+            _previousContacts.Clear();
+            _contactToSlot.Clear();
+
+            _validator = ValidatorFactory.Create(config);
+            _validator.OnPiecePlaced += OnValidatorPiecePlaced;
+            _validator.OnPuzzleSolved += OnValidatorPuzzleSolved;
+
+            _logger.SetLevel(config.levelId, config.conceptType);
+            _gameState = $"level_{config.levelId}_active";
+            _logger.LogSystem("level_start", _gameState);
+            _inputEnabled = true;
+
+            instructionsUI?.Show(config.taskDescription);
+            OnLevelStarted?.Invoke(config);
+
+            Debug.Log($"[Order Up!] Level {config.levelId}: {config.levelName} ({config.conceptType})");
         }
 
-        private void OnPuzzlePiecePlaced(int slotIndex, int glyphId)
+        private void HandleLevelCompleted(LevelConfig config)
         {
-            var correct = _puzzle.IsSlotCorrect(slotIndex);
+            OnLevelCompleted?.Invoke(config);
+        }
+
+        private void HandleShowLevelSelect()
+        {
+            _inputEnabled = false;
+            OnShowLevelSelect?.Invoke();
+        }
+
+        private void OnValidatorPiecePlaced(int slotIndex, int glyphId)
+        {
+            var correct = _validator.IsSlotCorrect(slotIndex);
             _gameState = correct ? $"slot_{slotIndex}_correct" : $"slot_{slotIndex}_incorrect";
             instructionsUI?.Hide();
             OnPiecePlaced?.Invoke(slotIndex, glyphId, correct);
         }
 
-        private void OnPuzzleSolvedInternal()
+        private void OnValidatorPuzzleSolved()
         {
-            _gameState = $"puzzle_solved_round_{_currentRound}";
-            _logger?.LogSystem("puzzle_complete", _gameState);
+            var config = levelManager.CurrentLevel;
+            _gameState = $"level_{config.levelId}_solved";
+            _logger.LogSystem("level_complete", _gameState);
+            _inputEnabled = false;
             OnPuzzleSolved?.Invoke();
 
-            if (_currentRound < totalRounds)
-            {
-                _nextRoundTimer = nextRoundDelay;
-            }
-            else
-            {
-                _gameState = "all_rounds_complete";
-                _logger?.LogSystem("all_rounds_complete", _gameState);
-            }
-        }
-
-        private void StartNextRound()
-        {
-            _currentRound++;
-            _previousContacts.Clear();
-            _contactToSlot.Clear();
-            _puzzle.Reset();
-            _gameState = $"puzzle_active_round_{_currentRound}";
-            _logger?.LogSystem("round_start", _gameState);
-            OnRoundStarted?.Invoke(_currentRound, totalRounds);
-            Debug.Log($"[Order Up!] Round {_currentRound}/{totalRounds}");
+            _levelCompleteTimer = levelManager.LevelCompleteDelay;
         }
 
         private void Update()
         {
-            if (_nextRoundTimer > 0)
+            if (_levelCompleteTimer > 0)
             {
-                _nextRoundTimer -= Time.deltaTime;
-                if (_nextRoundTimer <= 0)
-                    StartNextRound();
-                return; // pause input during round transition
+                _levelCompleteTimer -= Time.deltaTime;
+                if (_levelCompleteTimer <= 0)
+                    levelManager.CompleteCurrentLevel();
+                return;
             }
+
+            if (!_inputEnabled || _validator == null) return;
 
             foreach (var contact in BoardInput.GetActiveContacts(BoardContactType.Glyph))
             {
@@ -151,33 +159,38 @@ namespace BoardOfEducation
             }
         }
 
-        /// <summary>Attempts to place a glyph in the slot under its screen position.</summary>
         private void TryPlacePiece(BoardContact contact)
         {
-            var normalized = SequencePuzzle.NormalizePosition(contact.screenPosition);
-            var slotIndex = _puzzle.GetSlotForPosition(normalized);
+            var normalized = NormalizePosition(contact.screenPosition);
+            var slotIndex = _validator.GetSlotForPosition(normalized);
             var glyphId = contact.glyphId >= 0 ? contact.glyphId : contact.contactId;
 
-            if (slotIndex >= 0 && _puzzle.TryPlace(slotIndex, glyphId))
+            if (slotIndex >= 0 && _validator.TryPlace(slotIndex, glyphId))
             {
                 _contactToSlot[contact.contactId] = slotIndex;
             }
         }
 
-        /// <summary>Clears the slot when a piece is lifted; frees slot for re-placement.</summary>
         private void ClearPieceFromSlot(int contactId)
         {
             if (_contactToSlot.TryGetValue(contactId, out var slotIndex))
             {
-                _puzzle.ClearSlot(slotIndex);
+                _validator.ClearSlot(slotIndex);
                 _contactToSlot.Remove(contactId);
             }
         }
 
-        /// <summary>Spatial zones: left half = player_1, right half = player_2.</summary>
         private static string GetPlayerIdForPosition(Vector2 screenPosition)
         {
             return screenPosition.x < Screen.width * 0.5f ? "player_1" : "player_2";
+        }
+
+        private static Vector2 NormalizePosition(Vector2 screenPosition)
+        {
+            return new Vector2(
+                screenPosition.x / Screen.width,
+                screenPosition.y / Screen.height
+            );
         }
 
         private void ProcessFingerContact(BoardContact contact)
@@ -198,10 +211,16 @@ namespace BoardOfEducation
 
         private void OnDestroy()
         {
-            if (_puzzle != null)
+            if (_validator != null)
             {
-                _puzzle.OnPiecePlaced -= OnPuzzlePiecePlaced;
-                _puzzle.OnPuzzleSolved -= OnPuzzleSolvedInternal;
+                _validator.OnPiecePlaced -= OnValidatorPiecePlaced;
+                _validator.OnPuzzleSolved -= OnValidatorPuzzleSolved;
+            }
+            if (levelManager != null)
+            {
+                levelManager.OnLevelStarted -= HandleLevelStarted;
+                levelManager.OnLevelCompleted -= HandleLevelCompleted;
+                levelManager.OnShowLevelSelect -= HandleShowLevelSelect;
             }
             _logger?.LogSystem("session_end", _gameState);
             _logger?.Close();

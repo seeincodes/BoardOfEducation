@@ -3,10 +3,6 @@ using UnityEngine.UI;
 
 namespace BoardOfEducation
 {
-    /// <summary>
-    /// Shows feedback when pieces are placed (correct/incorrect) and when puzzle is solved.
-    /// Uses color for clarity (green=correct, amber=try again, gold=win). Optional audio.
-    /// </summary>
     [RequireComponent(typeof(GameManager))]
     public class PuzzleFeedbackUI : MonoBehaviour
     {
@@ -16,9 +12,10 @@ namespace BoardOfEducation
         [SerializeField] private float feedbackDuration = 2f;
 
         [Header("Colors (age 6+ friendly)")]
-        [SerializeField] private Color correctColor = new Color(0.2f, 0.8f, 0.2f);   // green
-        [SerializeField] private Color incorrectColor = new Color(1f, 0.6f, 0.2f);  // amber
-        [SerializeField] private Color winColor = new Color(1f, 0.85f, 0.2f);        // gold
+        [SerializeField] private Color correctColor = new Color(0.2f, 0.8f, 0.2f);
+        [SerializeField] private Color incorrectColor = new Color(1f, 0.6f, 0.2f);
+        [SerializeField] private Color winColor = new Color(1f, 0.85f, 0.2f);
+        [SerializeField] private Color levelStartColor = new Color(0.3f, 0.6f, 1f);
 
         [Header("Audio (optional)")]
         [SerializeField] private AudioSource audioSource;
@@ -40,7 +37,7 @@ namespace BoardOfEducation
             {
                 _gameManager.OnPiecePlaced += OnPiecePlaced;
                 _gameManager.OnPuzzleSolved += OnPuzzleSolved;
-                _gameManager.OnRoundStarted += OnRoundStarted;
+                _gameManager.OnLevelStarted += OnLevelStarted;
             }
         }
 
@@ -50,7 +47,7 @@ namespace BoardOfEducation
             {
                 _gameManager.OnPiecePlaced -= OnPiecePlaced;
                 _gameManager.OnPuzzleSolved -= OnPuzzleSolved;
-                _gameManager.OnRoundStarted -= OnRoundStarted;
+                _gameManager.OnLevelStarted -= OnLevelStarted;
             }
         }
 
@@ -75,17 +72,16 @@ namespace BoardOfEducation
 
         private void OnPuzzleSolved()
         {
-            var message = "You won! Great job!";
-            ShowFeedback(message, winColor);
+            ShowFeedback("You won! Great job!", winColor);
             PlaySound(winClip);
-            Debug.Log($"[Order Up!] {message}");
+            Debug.Log("[Order Up!] Level complete!");
         }
 
-        private void OnRoundStarted(int currentRound, int totalRounds)
+        private void OnLevelStarted(LevelConfig config)
         {
-            var message = $"Round {currentRound} of {totalRounds} — Go!";
-            ShowFeedback(message, correctColor);
-            Debug.Log($"[Order Up!] {message}");
+            var message = $"{config.levelName}";
+            ShowFeedback(message, levelStartColor);
+            Debug.Log($"[Order Up!] Starting: {config.levelName}");
         }
 
         private void ShowFeedback(string message, Color color)
