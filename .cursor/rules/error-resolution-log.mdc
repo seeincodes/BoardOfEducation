@@ -1,0 +1,35 @@
+---
+description: Log errors and fixes to ERROR_FIX_LOG.md when resolving issues
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# Error Resolution Log
+
+## When to Log
+
+Log to ERROR_FIX_LOG.md when resolving:
+
+- Build failures (Unity, Board SDK)
+- Runtime errors (NullReference, missing pieces, etc.)
+- File I/O errors (log write failures)
+- Board Simulator or device-specific issues
+- Anything that took >5 minutes to diagnose
+
+## When NOT to Log
+
+- Typos, linter warnings
+- Expected test failures
+- Minor refactors
+
+## Log Format
+
+| Date | Error | Context | Root Cause | Fix | Prevention |
+
+## Category Prefixes (for this project)
+
+- `[Unity]` — Engine, project setup
+- `[Board]` — Board SDK, Simulator, piece input
+- `[C#]` — Game logic, null refs, threading
+- `[IO]` — Log file, persistentDataPath
+- `[Build]` — Sideload, packaging

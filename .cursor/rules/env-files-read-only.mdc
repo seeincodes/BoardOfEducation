@@ -1,0 +1,25 @@
+---
+description: Protect environment files from accidental modification or exposure
+globs: [".env", ".env.*", ".env.local", ".env.production"]
+alwaysApply: true
+---
+
+# Env Files — Read-Only
+
+- Never modify .env without user confirmation.
+- Never commit env files to version control.
+- Never display API key values or secrets.
+- Never hardcode secrets in code.
+
+## Project Env Vars
+
+This project uses local file logging; no env vars are required for core functionality. Optional vars (if implemented):
+
+- `BOARD_LOG_PATH` — Override log directory (empty = Application.persistentDataPath)
+- `BOARD_DEBUG` — Verbose logging (0/1)
+
+## Adding New Vars
+
+1. Add to .env with empty value and comment.
+2. Document in TECH_STACK.md Environment Variables.
+3. Update this rule if vars become required.

@@ -1,0 +1,30 @@
+---
+description: Enforce the locked technology stack decisions from Pre-Search
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Tech Stack Lock
+
+## Locked Decisions
+
+| Decision | Locked To | Do NOT Switch To |
+|----------|-----------|------------------|
+| Game Engine | Unity 2021.3 | Unity 2022+, Godot, Unreal |
+| Language | C# | Other languages |
+| Board SDK | fun.board 3.2.1 | Other versions without verification |
+| Piece Set | Arcade pieces | Strata blocks, custom pieces |
+| Interaction Log | CSV, local file | JSON, cloud DB, binary |
+| Log Fields | timestamp, session_id, player_id, piece_id, action, position, rotation, game_state | Fewer fields; different schema |
+| Domain | Coding (logic puzzles) | Math, Reading |
+
+## Adding Dependencies
+
+1. Check Board SDK compatibility (Unity 2021.3, Input System 1.7.0).
+2. Document in TECH_STACK.md.
+3. Update this rule if it affects locked decisions.
+
+## Migration Notes
+
+- Upgrading Unity: Board SDK must support new version first.
+- Upgrading Board SDK: Test piece events, Session API; check changelog at docs.dev.board.fun.
