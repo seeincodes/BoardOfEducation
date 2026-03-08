@@ -32,7 +32,7 @@ namespace BoardOfEducation
         {
             EnsureHeader();
             var timestamp = DateTime.UtcNow.ToString("o");
-            var posStr = $"{position.x:F1},{position.y:F1}";
+            var posStr = EscapeCsv($"{position.x:F1},{position.y:F1}");
             var line = $"{timestamp},{_sessionId},{playerId},{pieceId},{action},{posStr},{orientationDegrees:F1},{EscapeCsv(gameState)}";
             _writer.WriteLine(line);
             _writer.Flush();
@@ -57,6 +57,7 @@ namespace BoardOfEducation
             _headerWritten = true;
         }
 
+        /// <summary>Escapes CSV fields containing comma, quote, or newline.</summary>
         private static string EscapeCsv(string value)
         {
             if (string.IsNullOrEmpty(value)) return "";

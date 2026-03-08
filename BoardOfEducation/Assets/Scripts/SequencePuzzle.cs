@@ -7,6 +7,9 @@ namespace BoardOfEducation
     /// Validates piece placements for the Order Up! sequence puzzle.
     /// Tracks which glyph is in which slot and checks win condition.
     /// </summary>
+    /// <remarks>
+    /// Slot bounds: normalized 0-1 rects (default: 4 quadrants). Position (0,0) = top-left.
+    /// </remarks>
     public class SequencePuzzle
     {
         private readonly PuzzleConfig _config;
@@ -29,6 +32,7 @@ namespace BoardOfEducation
 
         /// <summary>
         /// Get slot index for a screen position (normalized 0-1, y flipped for Unity).
+        /// Returns -1 if position is outside all slot bounds.
         /// </summary>
         public int GetSlotForPosition(Vector2 normalizedPosition)
         {

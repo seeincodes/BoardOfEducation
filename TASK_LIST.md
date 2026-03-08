@@ -28,7 +28,7 @@
 - [x] Hook piece placement events to logger
 - [x] Hook piece rotation events to logger
 - [x] Write to local file (e.g., `Application.persistentDataPath`)
-- [ ] Generate sample log from one gameplay session
+- [x] Generate sample log from one gameplay session
 
 ### 5. Integration
 - [ ] Integrate Board Pause Screen (optional)
@@ -43,9 +43,9 @@
 - [ ] Polish UI for readability and accessibility
 
 ### 7. Documentation
-- [ ] Write comprehensive README (setup, usage, build, sideload)
-- [ ] Document interaction log format and sample
-- [ ] Add code comments for key systems
+- [x] Write comprehensive README (setup, usage, build, sideload)
+- [x] Document interaction log format and sample
+- [x] Add code comments for key systems
 
 ### 8. Optional Enhancements
 - [ ] Integrate Board Save Games for session persistence

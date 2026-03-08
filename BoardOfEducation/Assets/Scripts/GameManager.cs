@@ -9,6 +9,10 @@ namespace BoardOfEducation
     /// Main game controller. Polls Board contacts (glyphs = pieces), logs interactions,
     /// and runs the Order Up! sequence puzzle validation.
     /// </summary>
+    /// <remarks>
+    /// - Player assignment: left half of screen = player_1, right half = player_2
+    /// - Subscribes to SequencePuzzle events for OnPiecePlaced and OnPuzzleSolved
+    /// </remarks>
     public class GameManager : MonoBehaviour
     {
         [SerializeField] private PuzzleConfig puzzleConfig;
@@ -103,6 +107,7 @@ namespace BoardOfEducation
             }
         }
 
+        /// <summary>Attempts to place a glyph in the slot under its screen position.</summary>
         private void TryPlacePiece(BoardContact contact)
         {
             var normalized = SequencePuzzle.NormalizePosition(contact.screenPosition);
@@ -115,6 +120,7 @@ namespace BoardOfEducation
             }
         }
 
+        /// <summary>Clears the slot when a piece is lifted; frees slot for re-placement.</summary>
         private void ClearPieceFromSlot(int contactId)
         {
             if (_contactToSlot.TryGetValue(contactId, out var slotIndex))
@@ -124,6 +130,7 @@ namespace BoardOfEducation
             }
         }
 
+        /// <summary>Spatial zones: left half = player_1, right half = player_2.</summary>
         private static string GetPlayerIdForPosition(Vector2 screenPosition)
         {
             return screenPosition.x < Screen.width * 0.5f ? "player_1" : "player_2";

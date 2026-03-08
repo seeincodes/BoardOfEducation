@@ -1,0 +1,11 @@
+timestamp,session_id,player_id,piece_id,action,position,rotation,game_state
+2026-03-08T20:00:01.000Z,a1b2c3d4,system,_,session_start,_,_,game_initialized
+2026-03-08T20:00:05.123Z,a1b2c3d4,player_1,glyph_0,place,"120.5,80.2",0.0,puzzle_active
+2026-03-08T20:00:08.456Z,a1b2c3d4,player_2,glyph_1,place,"520.3,85.1",90.0,slot_0_correct
+2026-03-08T20:00:12.789Z,a1b2c3d4,player_1,glyph_2,place,"115.0,420.0",180.0,slot_1_correct
+2026-03-08T20:00:15.012Z,a1b2c3d4,player_2,glyph_2,move,"118.0,418.5",180.0,slot_2_incorrect
+2026-03-08T20:00:18.345Z,a1b2c3d4,player_2,glyph_2,lift,"118.0,418.5",180.0,slot_2_incorrect
+2026-03-08T20:00:22.678Z,a1b2c3d4,player_1,glyph_2,place,"520.0,420.5",0.0,slot_2_correct
+2026-03-08T20:00:25.901Z,a1b2c3d4,player_2,glyph_3,place,"525.0,780.2",270.0,puzzle_solved
+2026-03-08T20:00:26.000Z,a1b2c3d4,system,_,puzzle_complete,_,_,puzzle_solved
+2026-03-08T20:00:30.000Z,a1b2c3d4,system,_,session_end,_,_,puzzle_solved

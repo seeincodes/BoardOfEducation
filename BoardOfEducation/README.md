@@ -1,6 +1,6 @@
 # Board of Education
 
-A 2-player coding logic puzzle game for the Board.fun physical-digital console. Built for SuperBuilders 1-week challenge.
+A 2-player collaborative coding logic puzzle for the Board.fun physical-digital console. Teaches **sequencing** (order matters) through the "Order Up!" game. Built for SuperBuilders 1-week challenge.
 
 ## Requirements
 
@@ -8,51 +8,72 @@ A 2-player coding logic puzzle game for the Board.fun physical-digital console. 
 - **Board SDK** — Included in `Packages/fun.board-3.2.1.tgz`
 - **Board Docs** — [docs.dev.board.fun](https://docs.dev.board.fun/)
 
-## Setup
+## Quick Start
 
-1. **Install Unity 2021.3** (2021.3.52f1 or later 2021.3.x)
+1. **Install Unity 2021.3** (2021.3.52f1 or later)
 2. **Open project** — Unity Hub → Add → Select `BoardOfEducation` folder
-3. **Wait for import** — Unity will resolve packages (Board SDK, Input System)
-4. **Board setup** — Follow [Board Quick Start](https://docs.dev.board.fun/get-started/quick-start) to configure project settings
-5. **Import Input sample** — Package Manager → fun.board → Samples → Import "Input"
-6. **Create game scene** — New Scene → Add empty GameObject → Add `GameManager` component (from Assets/Scripts/GameManager.cs) → Save as `Assets/Scenes/Game.unity`
+3. **Wait for import** — Unity resolves Board SDK, Input System
+4. **Import Input sample** — Package Manager → fun.board → Samples → Import "Input"
+5. **Create game scene** — New Scene → Add GameObject with `GameManager` + `PuzzleFeedbackUI` → Save as `Assets/Scenes/Game.unity`
+6. **Press Play** — Run in Editor with Board Simulator
+
+See [SETUP.md](SETUP.md) for detailed setup.
+
+## Usage
+
+- **Goal:** Place physical pieces in the correct sequence (Order Up! puzzle)
+- **Players:** 2 players collaborate; left half of screen = Player 1, right = Player 2
+- **Feedback:** "Correct!" / "Try again!" / "You won!" (Debug.Log + optional UI Text)
+- **Logs:** All interactions are logged to CSV (see [INTERACTION_LOG.md](INTERACTION_LOG.md))
+
+## Build & Sideload
+
+### Simulator (Development)
+
+- Play in Unity Editor → Board Simulator runs automatically
+- No physical Board required
+
+### Physical Board
+
+1. **Build target:** File → Build Settings → Android (Board runs Android)
+2. **Board settings:** Configure per [Board Build & Deploy](https://docs.dev.board.fun/reference/build-deploy)
+3. **Build:** Build and Run, or export APK
+4. **Sideload:** Install APK on Board (no app store required)
 
 ## Project Structure
 
 ```
 BoardOfEducation/
 ├── Assets/
-│   └── Scripts/          # Game logic, InteractionLogger
+│   └── Scripts/           # GameManager, SequencePuzzle, InteractionLogger
 ├── Packages/
-│   ├── manifest.json    # Board SDK + dependencies
+│   ├── manifest.json      # Board SDK + dependencies
 │   └── fun.board-3.2.1.tgz
-├── ProjectSettings/
+├── sample_interaction_log.csv
+├── SETUP.md
+├── INTERACTION_LOG.md
 └── README.md
 ```
 
-## Running
-
-- **Simulator:** Play in Editor with Board Simulator (no physical device needed)
-- **Physical Board:** Build and sideload per [Board Build & Deploy](https://docs.dev.board.fun/reference/build-deploy)
-
 ## Interaction Log
-
-All piece interactions are logged to CSV at `Application.persistentDataPath`:
 
 | Column      | Description                    |
 |-------------|--------------------------------|
-| timestamp   | ISO 8601                       |
+| timestamp   | ISO 8601 (UTC)                 |
 | session_id  | Unique session                 |
-| player_id   | Player 1 or 2                  |
-| piece_id    | Board piece identifier         |
-| action      | place \| rotate                |
-| position    | x,y                            |
+| player_id   | player_1, player_2, or system  |
+| piece_id    | glyph_{id} or finger_{id}      |
+| action      | place, move, rotate, lift      |
+| position    | x,y (screen pixels)            |
 | rotation    | degrees                        |
-| game_state  | Snapshot at interaction        |
+| game_state  | Snapshot at interaction       |
+
+Logs are written to `Application.persistentDataPath/interaction_logs/`. See [INTERACTION_LOG.md](INTERACTION_LOG.md) and [sample_interaction_log.csv](sample_interaction_log.csv).
 
 ## References
 
 - [SETUP](SETUP.md) — Detailed setup and scene creation
+- [INTERACTION_LOG](INTERACTION_LOG.md) — Log format and sample
 - [GAME_DESIGN](../GAME_DESIGN.md) — Order Up! puzzle concept
 - [PRD](../PRD.md)
 - [TASK_LIST](../TASK_LIST.md)
