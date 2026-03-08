@@ -85,3 +85,4 @@ Build a **single educational game** for the Board.fun physical-digital game cons
 - **Board.fun:** https://board.fun/pages/developers
 - **Board Unity SDK:** https://github.com/b3-fun/unity-sdk
 - **SuperBuilders:** https://www.superbuilders.school/
+- **LightBot:** https://lightbot.com/ — Design reference for coding puzzle mechanics (sequencing, procedures, loops)

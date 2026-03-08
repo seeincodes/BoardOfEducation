@@ -1,8 +1,18 @@
 # Game Design: Order Up!
 
+## Design References
+
+**[LightBot](https://lightbot.com/)** — Primary reference. LightBot is a puzzle game that "secretly teaches programming logic as you play." It teaches:
+- **Sequencing** — placing commands in order
+- **Procedures** — reusable command blocks
+- **Loops** — repeating patterns
+- **Conditionals** — branching logic
+
+LightBot is icon-based, all-ages friendly, and used by millions of kids and teachers. We adopt its principles: **icon-based commands**, **clear win conditions**, **gradual progression**, and **learning through play**—adapted for Board's physical pieces and 2-player collaboration.
+
 ## Concept
 
-**Order Up!** is a 2-player collaborative coding logic puzzle for ages 6+. It teaches **sequencing**—the foundational idea that "order matters" in code: do this first, then this, then this.
+**Order Up!** is a 2-player collaborative coding logic puzzle for ages 6+. It teaches **sequencing**—the foundational idea that "order matters" in code: do this first, then this, then this. Like LightBot's command sequences, our physical pieces represent steps that must be placed in the correct order.
 
 ## Core Mechanic
 
@@ -14,9 +24,9 @@
 
 ## Educational Goal
 
-- **Intrinsic:** The fun is figuring out the right order through discussion ("Does the backpack go before or after breakfast?").
+- **Intrinsic:** The fun is figuring out the right order through discussion ("Does the backpack go before or after breakfast?"). Like LightBot, learning happens through play, not explicit instruction.
 - **Collaborative:** Players must talk, negotiate, and agree. No single player has all the answers.
-- **Coding concept:** Sequencing—the first building block of programs.
+- **Coding concept:** Sequencing—the first building block of programs (LightBot's foundational concept).
 
 ## Flow
 
@@ -55,10 +65,16 @@
 
 ## Simplifications for MVP
 
-1. **Single puzzle** — One fixed sequence (e.g., brush → eat → pack → go).
-2. **3–4 pieces** — Matches typical Arcade piece set.
-3. **Slots as regions** — Define screen regions (e.g., quadrants) as slots; piece "in" region = placed.
+1. **Single puzzle** — One fixed sequence (e.g., brush → eat → pack → go). LightBot-style progression (multiple levels) can be added later.
+2. **3–4 pieces** — Matches typical Arcade piece set. Each piece = one "command" in the sequence.
+3. **Slots as regions** — Define screen regions (e.g., quadrants) as slots; piece "in" region = placed. Analogous to LightBot's command slots.
 4. **No rotation meaning** — Rotation logged but not used for logic (keep it simple).
+
+## Future: LightBot-Inspired Extensions
+
+- **Procedures:** A piece that represents "do steps 1–3" (chunked sequence).
+- **Loops:** A "repeat" piece that means "do this twice."
+- **Conditionals:** Pieces with branching (e.g., "if morning, do X").
 
 ## Win Condition
 
