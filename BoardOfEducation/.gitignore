@@ -33,6 +33,7 @@ sysinfo.txt
 *.log
 interaction_logs/
 .sdk-temp/
+.sdk-extract/
 
 # OS
 .DS_Store

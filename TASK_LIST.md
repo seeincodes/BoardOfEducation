@@ -10,17 +10,17 @@
 - [ ] Add Arcade piece set (or equivalent) to project
 
 ### 2. Game Design
-- [ ] Define coding logic puzzle concept (age 6+, 2-player)
-- [ ] Design puzzle mechanics using physical pieces
-- [ ] Map piece placements/rotations to game state
-- [ ] Create paper/sketch of game flow and win condition
+- [x] Define coding logic puzzle concept (age 6+, 2-player)
+- [x] Design puzzle mechanics using physical pieces
+- [x] Map piece placements/rotations to game state
+- [x] Create paper/sketch of game flow and win condition
 
 ### 3. Core Gameplay
-- [ ] Implement game scene and Board touch/piece input handling
-- [ ] Implement 2-player session (Board Session Management or custom)
-- [ ] Implement puzzle logic and validation
-- [ ] Implement win/lose feedback
-- [ ] Ensure collaborative play flow (turn-taking or simultaneous as designed)
+- [x] Implement game scene and Board touch/piece input handling
+- [x] Implement 2-player session (Board Session Management or custom)
+- [x] Implement puzzle logic and validation
+- [x] Implement win/lose feedback
+- [x] Ensure collaborative play flow (turn-taking or simultaneous as designed)
 
 ### 4. Interaction Logging
 - [x] Create InteractionLogger service (CSV writer)

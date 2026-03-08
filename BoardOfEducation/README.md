@@ -52,6 +52,8 @@ All piece interactions are logged to CSV at `Application.persistentDataPath`:
 
 ## References
 
+- [SETUP](SETUP.md) — Detailed setup and scene creation
+- [GAME_DESIGN](../GAME_DESIGN.md) — Order Up! puzzle concept
 - [PRD](../PRD.md)
 - [TASK_LIST](../TASK_LIST.md)
 - [TECH_STACK](../TECH_STACK.md)
