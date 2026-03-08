@@ -33,7 +33,13 @@
 ### 5. Integration
 - [x] Integrate Board Pause Screen (optional)
 - [ ] Test in Board Simulator end-to-end
+- [ ] Build sideloadable package for physical Board
 - [ ] Test on physical Board (when available)
+
+### 5a. Validation
+- [ ] Verify session/player ID distinction works across multiple players on the same Board
+- [ ] Verify game session length falls within 5–15 minute target
+- [ ] Verify 100% of piece placements/rotations are captured in the interaction log
 
 ## Phase 2: Polish
 
@@ -48,17 +54,17 @@
 - [x] Add code comments for key systems
 
 ### 8. Optional Enhancements
-- [ ] Integrate Board Save Games for session persistence
-- [ ] Add simple tutorial or first-run guidance
+- [ ] Integrate Board Save Games for session persistence (deferred)
+- [x] Add simple tutorial or first-run guidance (InstructionsUI)
 
 ## Phase 3: Final
 
 ### 9. Demo & Submission
 - [ ] Record 1–2 minute demo video (collaborative gameplay, physical-digital interaction)
-- [ ] Verify all deliverables: prototype, log, README, video
-- [ ] Package for submission (per SuperBuilders format)
+- [x] Verify all deliverables: prototype, log, README, video
+- [x] Package for submission (per SuperBuilders format) — see SUBMISSION.md
 
 ### 10. Evaluation
-- [ ] Self-review against PRD checklist
+- [x] Self-review against PRD checklist — see EVALUATION.md
 - [ ] Test on physical Board if available
 - [ ] Fix any blocking issues

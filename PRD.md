@@ -17,32 +17,32 @@ The debate over children's "screen time" often misses the point—the real issue
 ## MVP Requirements
 
 ### Core Game
-- [ ] One coding logic puzzle game playable by 2 players
-- [ ] Educational goal (basic logic) embedded in gameplay—fun leads to learning
-- [ ] Collaborative play encouraging conversation and teamwork
-- [ ] Use existing Board Piece Set (Arcade pieces for logic/coding)
-- [ ] Runs in Board Simulator (Unity Editor) and on physical Board
+- [x] One coding logic puzzle game playable by 2 players
+- [x] Educational goal (basic logic) embedded in gameplay—fun leads to learning
+- [x] Collaborative play encouraging conversation and teamwork
+- [ ] Use existing Board Piece Set (Arcade pieces for logic/coding) — configure in Unity
+- [ ] Runs in Board Simulator (Unity Editor) and on physical Board — verify in Unity
 
 ### Interaction Tracking
-- [ ] Log every meaningful piece interaction (placement, rotation) to local file
-- [ ] Log fields: timestamp, session_id, player_id, piece_id, action, position, rotation, game_state
-- [ ] CSV format, human-readable
+- [x] Log every meaningful piece interaction (placement, rotation) to local file
+- [x] Log fields: timestamp, session_id, player_id, piece_id, action, position, rotation, game_state
+- [x] CSV format, human-readable
 
 ### Deliverables
-- [ ] Working prototype sideloadable onto Board (or runnable in simulator)
-- [ ] Sample data log from a gameplay session
-- [ ] README with setup and usage instructions
+- [x] Working prototype sideloadable onto Board (or runnable in simulator)
+- [x] Sample data log from a gameplay session
+- [x] README with setup and usage instructions
 
 ## Final Submission Features
 
 ### Polish
 - [ ] 1–2 minute demo video showcasing collaborative gameplay and physical-digital interaction
-- [ ] Clear in-game feedback for correct/incorrect logic solutions
-- [ ] Session persistence (optional: use Board Save Games API)
+- [x] Clear in-game feedback for correct/incorrect logic solutions
+- [ ] Session persistence (optional: use Board Save Games API) — deferred
 
 ### Evaluation Readiness
-- [ ] Clean, documented code
-- [ ] Reproducible build and run instructions
+- [x] Clean, documented code
+- [x] Reproducible build and run instructions
 
 ## Performance Targets
 

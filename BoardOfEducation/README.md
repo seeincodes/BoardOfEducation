@@ -75,6 +75,8 @@ Logs are written to `Application.persistentDataPath/interaction_logs/`. See [INT
 - [SETUP](SETUP.md) — Detailed setup and scene creation
 - [INTERACTION_LOG](INTERACTION_LOG.md) — Log format and sample
 - [GAME_DESIGN](../GAME_DESIGN.md) — Order Up! puzzle concept
+- [SUBMISSION](../SUBMISSION.md) — Submission checklist and packaging
+- [EVALUATION](../EVALUATION.md) — PRD self-review
 - [PRD](../PRD.md)
 - [TASK_LIST](../TASK_LIST.md)
 - [TECH_STACK](../TECH_STACK.md)
