@@ -93,6 +93,21 @@ The game features **14 levels** spanning **4 coding concepts**, inspired by Ligh
 
 Each level is defined by a `LevelConfig` ScriptableObject and validated by a concept-specific `IPuzzleValidator` implementation. For full design details, see [`docs/plans/2026-03-08-level-system-design.md`](docs/plans/2026-03-08-level-system-design.md).
 
+## Visual Theme: Fantasy Adventure
+
+Each coding concept is presented as a distinct fantasy world:
+
+| World | Concept | Palette | Atmosphere |
+|-------|---------|---------|------------|
+| Enchanted Forest | Sequencing | Greens, golds, mossy browns | Floating leaves, fireflies |
+| Castle Workshop | Procedures | Stone grays, torch orange, purple | Sparks, torch flicker |
+| Mystic Ocean | Loops | Deep blues, teal, coral | Rising bubbles, bioluminescence |
+| Dragon's Crossroads | Conditionals | Fire reds vs ice blues | Embers and snowflakes |
+
+Visual elements are generated procedurally (gradient backgrounds, floating particles) combined with free asset pack icons. Each world has distinct slot indicator colors, feedback colors, and transition effects.
+
+For full visual design details, see [`docs/plans/2026-03-09-fantasy-visual-overhaul-design.md`](docs/plans/2026-03-09-fantasy-visual-overhaul-design.md).
+
 ## Win Condition
 
 All pieces in correct slots → `OnPuzzleSolved()` → log `puzzle_complete` → show win UI.
