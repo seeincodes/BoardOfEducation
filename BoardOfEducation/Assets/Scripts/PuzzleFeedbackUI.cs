@@ -45,6 +45,12 @@ namespace BoardOfEducation
             levelStartColor = theme.levelStartFeedbackColor;
         }
 
+        private void OnDestroy()
+        {
+            if (themeManager != null)
+                themeManager.OnThemeChanged -= OnThemeChanged;
+        }
+
         private void OnEnable()
         {
             if (_gameManager != null)

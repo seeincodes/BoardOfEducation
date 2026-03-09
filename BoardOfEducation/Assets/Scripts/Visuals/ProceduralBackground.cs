@@ -9,7 +9,7 @@ namespace BoardOfEducation.Visuals
         private RawImage _bgImage;
         private Texture2D _gradientTex;
         private ThemeConfig _theme;
-        private float _animOffset;
+        private RectTransform _rectTransform;
 
         // Particle children
         private RectTransform[] _particles;
@@ -22,6 +22,7 @@ namespace BoardOfEducation.Visuals
         {
             _theme = theme;
             _bgImage = GetComponent<RawImage>();
+            _rectTransform = GetComponent<RectTransform>();
 
             GenerateGradientTexture();
             SpawnParticles();
@@ -55,15 +56,13 @@ namespace BoardOfEducation.Visuals
             _particleVelocities = new Vector2[count];
             _particleImages = new Image[count];
 
-            var parentRect = GetComponent<RectTransform>();
-
             for (int i = 0; i < count; i++)
             {
                 var go = new GameObject($"Particle_{i}");
                 var rt = go.AddComponent<RectTransform>();
                 rt.SetParent(transform, false);
 
-                float size = _theme.particleSize * Mathf.Min(parentRect.rect.width, parentRect.rect.height);
+                float size = _theme.particleSize * Mathf.Min(_rectTransform.rect.width, _rectTransform.rect.height);
                 size = Mathf.Max(size, 8f);
                 rt.sizeDelta = new Vector2(size, size);
 
@@ -71,8 +70,8 @@ namespace BoardOfEducation.Visuals
                 rt.anchorMin = Vector2.zero;
                 rt.anchorMax = Vector2.zero;
                 rt.anchoredPosition = new Vector2(
-                    Random.Range(0f, parentRect.rect.width),
-                    Random.Range(0f, parentRect.rect.height)
+                    Random.Range(0f, _rectTransform.rect.width),
+                    Random.Range(0f, _rectTransform.rect.height)
                 );
 
                 var img = go.AddComponent<Image>();
@@ -93,12 +92,8 @@ namespace BoardOfEducation.Visuals
         {
             if (_theme == null || _particles == null) return;
 
-            var parentRect = GetComponent<RectTransform>();
-            float w = parentRect.rect.width;
-            float h = parentRect.rect.height;
-
-            // Animate gradient hue shift
-            _animOffset += Time.deltaTime * _theme.gradientAnimSpeed * 0.01f;
+            float w = _rectTransform.rect.width;
+            float h = _rectTransform.rect.height;
 
             // Animate particles
             for (int i = 0; i < _particles.Length; i++)

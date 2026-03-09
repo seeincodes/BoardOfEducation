@@ -8,6 +8,7 @@ namespace BoardOfEducation.Visuals
         private Image[] _slotIndicators;
         private ThemeConfig _theme;
         private bool[] _slotCorrect;
+        private bool[] _slotOccupied;
         private int _slotCount;
 
         public void Initialize(ThemeConfig theme, Rect[] slotBounds, RectTransform parentCanvas)
@@ -15,6 +16,7 @@ namespace BoardOfEducation.Visuals
             _theme = theme;
             _slotCount = slotBounds.Length;
             _slotCorrect = new bool[_slotCount];
+            _slotOccupied = new bool[_slotCount];
 
             ClearIndicators();
             _slotIndicators = new Image[_slotCount];
@@ -57,6 +59,7 @@ namespace BoardOfEducation.Visuals
         {
             if (slotIndex < 0 || slotIndex >= _slotCount) return;
             _slotCorrect[slotIndex] = correct;
+            _slotOccupied[slotIndex] = true;
 
             if (_slotIndicators != null && slotIndex < _slotIndicators.Length && _slotIndicators[slotIndex] != null)
             {
@@ -68,6 +71,7 @@ namespace BoardOfEducation.Visuals
         {
             if (slotIndex < 0 || slotIndex >= _slotCount) return;
             _slotCorrect[slotIndex] = false;
+            _slotOccupied[slotIndex] = false;
             if (_slotIndicators != null && slotIndex < _slotIndicators.Length && _slotIndicators[slotIndex] != null)
             {
                 _slotIndicators[slotIndex].color = _theme.slotIdleColor;
@@ -82,7 +86,7 @@ namespace BoardOfEducation.Visuals
             float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * _theme.slotPulseSpeed);
             for (int i = 0; i < _slotCount; i++)
             {
-                if (_slotCorrect[i] || _slotIndicators[i] == null) continue;
+                if (_slotOccupied[i] || _slotIndicators[i] == null) continue;
                 _slotIndicators[i].color = Color.Lerp(_theme.slotIdleColor, _theme.slotPulseColor, pulse * 0.5f);
             }
         }
