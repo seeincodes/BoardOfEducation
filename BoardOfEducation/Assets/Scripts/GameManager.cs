@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Board.Core;
 using Board.Input;
 using BoardOfEducation.Validators;
+using BoardOfEducation.Visuals;
 using UnityEngine;
 
 namespace BoardOfEducation
@@ -12,6 +13,11 @@ namespace BoardOfEducation
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private bool logFingerTouches = false;
         [SerializeField] private InstructionsUI instructionsUI;
+        [SerializeField] private ThemeManager themeManager;
+        [SerializeField] private ProceduralBackground proceduralBackground;
+        [SerializeField] private SlotVisualizer slotVisualizer;
+        [SerializeField] private TransitionManager transitionManager;
+        [SerializeField] private RectTransform gameCanvas;
 
         public event Action<int, int, bool> OnPiecePlaced;
         public event Action OnPuzzleSolved;
@@ -66,6 +72,28 @@ namespace BoardOfEducation
             _logger.LogSystem("level_start", _gameState);
             _inputEnabled = true;
 
+            // Apply visual theme
+            if (themeManager != null)
+            {
+                var theme = themeManager.GetThemeForConcept(config.conceptType);
+                if (theme != null)
+                {
+                    System.Action applyVisuals = () =>
+                    {
+                        themeManager.ApplyTheme(config.conceptType);
+                        if (proceduralBackground != null)
+                            proceduralBackground.Initialize(theme);
+                        if (slotVisualizer != null && gameCanvas != null)
+                            slotVisualizer.Initialize(theme, config.slotBounds, gameCanvas);
+                    };
+
+                    if (transitionManager != null)
+                        transitionManager.TransitionTo(theme, applyVisuals);
+                    else
+                        applyVisuals();
+                }
+            }
+
             instructionsUI?.Show(config.taskDescription);
             OnLevelStarted?.Invoke(config);
 
@@ -88,6 +116,8 @@ namespace BoardOfEducation
             var correct = _validator.IsSlotCorrect(slotIndex);
             _gameState = correct ? $"slot_{slotIndex}_correct" : $"slot_{slotIndex}_incorrect";
             instructionsUI?.Hide();
+            if (slotVisualizer != null)
+                slotVisualizer.SetSlotState(slotIndex, correct);
             OnPiecePlaced?.Invoke(slotIndex, glyphId, correct);
         }
 
@@ -176,6 +206,8 @@ namespace BoardOfEducation
             if (_contactToSlot.TryGetValue(contactId, out var slotIndex))
             {
                 _validator.ClearSlot(slotIndex);
+                if (slotVisualizer != null)
+                    slotVisualizer.ResetSlot(slotIndex);
                 _contactToSlot.Remove(contactId);
             }
         }
