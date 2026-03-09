@@ -16,21 +16,34 @@ namespace BoardOfEducation
         [SerializeField] private ThemeManager themeManager;
         [SerializeField] private Image panelBackground;
         [SerializeField] private Text[] conceptHeaders;
+        [SerializeField] private Button helpButton;
 
         private void OnEnable()
         {
             if (gameManager != null)
+            {
                 gameManager.OnShowLevelSelect += Show;
-            if (gameManager != null)
                 gameManager.OnLevelStarted += OnLevelStarted;
+            }
+            if (helpButton != null)
+                helpButton.onClick.AddListener(OnHelpClicked);
         }
 
         private void OnDisable()
         {
             if (gameManager != null)
+            {
                 gameManager.OnShowLevelSelect -= Show;
-            if (gameManager != null)
                 gameManager.OnLevelStarted -= OnLevelStarted;
+            }
+            if (helpButton != null)
+                helpButton.onClick.RemoveListener(OnHelpClicked);
+        }
+
+        private void OnHelpClicked()
+        {
+            if (gameManager != null)
+                gameManager.ShowHowToPlay();
         }
 
         private void OnLevelStarted(LevelConfig config)

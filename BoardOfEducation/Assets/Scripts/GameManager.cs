@@ -13,6 +13,7 @@ namespace BoardOfEducation
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private bool logFingerTouches = false;
         [SerializeField] private InstructionsUI instructionsUI;
+        [SerializeField] private HowToPlayUI howToPlayUI;
         [SerializeField] private ThemeManager themeManager;
         [SerializeField] private ProceduralBackground proceduralBackground;
         [SerializeField] private SlotVisualizer slotVisualizer;
@@ -48,6 +49,19 @@ namespace BoardOfEducation
             levelManager.OnLevelCompleted += HandleLevelCompleted;
             levelManager.OnShowLevelSelect += HandleShowLevelSelect;
 
+            if (howToPlayUI != null)
+            {
+                howToPlayUI.OnDismissed += OnHowToPlayDismissed;
+                howToPlayUI.Show();
+            }
+            else
+            {
+                levelManager.StartGame();
+            }
+        }
+
+        private void OnHowToPlayDismissed()
+        {
             levelManager.StartGame();
         }
 
@@ -109,6 +123,11 @@ namespace BoardOfEducation
         {
             _inputEnabled = false;
             OnShowLevelSelect?.Invoke();
+        }
+
+        public void ShowHowToPlay()
+        {
+            howToPlayUI?.Show();
         }
 
         private void OnValidatorPiecePlaced(int slotIndex, int glyphId)
@@ -248,6 +267,8 @@ namespace BoardOfEducation
                 _validator.OnPiecePlaced -= OnValidatorPiecePlaced;
                 _validator.OnPuzzleSolved -= OnValidatorPuzzleSolved;
             }
+            if (howToPlayUI != null)
+                howToPlayUI.OnDismissed -= OnHowToPlayDismissed;
             if (levelManager != null)
             {
                 levelManager.OnLevelStarted -= HandleLevelStarted;
