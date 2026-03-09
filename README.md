@@ -59,23 +59,23 @@ SuperBuilders/
 
 ## Running the Game
 
-| Mode | How |
-|------|-----|
-| **Simulator** | Press Play in Unity Editor — Board Simulator runs automatically |
+| Mode               | How                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **Simulator**      | Press Play in Unity Editor — Board Simulator runs automatically                      |
 | **Physical Board** | Build Android APK → sideload to Board (menu: Board of Education → Build Android APK) |
 
 ---
 
 ## Key Documentation
 
-| Doc | Purpose |
-|-----|---------|
-| [BoardOfEducation/README.md](BoardOfEducation/README.md) | Unity project overview |
-| [BoardOfEducation/SETUP.md](BoardOfEducation/SETUP.md) | Detailed setup and scene creation |
-| [BoardOfEducation/UNITY_SETUP_CHECKLIST.md](BoardOfEducation/UNITY_SETUP_CHECKLIST.md) | First-time Unity checklist |
-| [GAME_DESIGN.md](GAME_DESIGN.md) | Puzzle concept (Order Up!) |
-| [SUBMISSION.md](SUBMISSION.md) | Submission and packaging |
-| [docs.dev.board.fun](https://docs.dev.board.fun/) | Board SDK documentation |
+| Doc                                                                                    | Purpose                           |
+| -------------------------------------------------------------------------------------- | --------------------------------- |
+| [BoardOfEducation/README.md](BoardOfEducation/README.md)                               | Unity project overview            |
+| [BoardOfEducation/SETUP.md](BoardOfEducation/SETUP.md)                                 | Detailed setup and scene creation |
+| [BoardOfEducation/UNITY_SETUP_CHECKLIST.md](BoardOfEducation/UNITY_SETUP_CHECKLIST.md) | First-time Unity checklist        |
+| [GAME_DESIGN.md](GAME_DESIGN.md)                                                       | Puzzle concept (Order Up!)        |
+| [SUBMISSION.md](SUBMISSION.md)                                                         | Submission and packaging          |
+| [docs.dev.board.fun](https://docs.dev.board.fun/)                                      | Board SDK documentation           |
 
 ---
 
@@ -87,7 +87,6 @@ SuperBuilders/
 
 ---
 
-## Contact
+## References
 
-- **SuperBuilders:** Patrick Skinner (patrick.skinner@superbuilders.school)
 - **Board SDK:** [docs.dev.board.fun](https://docs.dev.board.fun/) | [Discord](https://discord.gg/KccHAYgykD)
