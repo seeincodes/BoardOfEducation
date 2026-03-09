@@ -7,7 +7,7 @@
 - [x] Install Board SDK (fun.board 3.2.1) from `~/Downloads/fun.board-3.2.1.tgz`
 - [ ] Import Board Input sample scene; verify simulator runs
 - [ ] Configure Board Project Settings per docs.dev.board.fun
-- [ ] Add Arcade piece set (or equivalent) to project
+- [x] Add Arcade piece set (or equivalent) to project
 
 ### 2. Game Design
 - [x] Define coding logic puzzle concept (age 6+, 2-player)
