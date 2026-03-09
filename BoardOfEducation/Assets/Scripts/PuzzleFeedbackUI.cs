@@ -1,3 +1,4 @@
+using BoardOfEducation.Visuals;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,9 @@ namespace BoardOfEducation
         [SerializeField] private Color winColor = new Color(1f, 0.85f, 0.2f);
         [SerializeField] private Color levelStartColor = new Color(0.3f, 0.6f, 1f);
 
+        [Header("Theme")]
+        [SerializeField] private ThemeManager themeManager;
+
         [Header("Audio (optional)")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip correctClip;
@@ -29,6 +33,16 @@ namespace BoardOfEducation
         private void Awake()
         {
             _gameManager = GetComponent<GameManager>();
+            if (themeManager != null)
+                themeManager.OnThemeChanged += OnThemeChanged;
+        }
+
+        private void OnThemeChanged(ThemeConfig theme)
+        {
+            correctColor = theme.correctFeedbackColor;
+            incorrectColor = theme.incorrectFeedbackColor;
+            winColor = theme.winFeedbackColor;
+            levelStartColor = theme.levelStartFeedbackColor;
         }
 
         private void OnEnable()
