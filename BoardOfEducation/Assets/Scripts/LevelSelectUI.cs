@@ -1,4 +1,5 @@
 using System;
+using BoardOfEducation.Visuals;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,9 @@ namespace BoardOfEducation
         [SerializeField] private Text titleText;
         [SerializeField] private Button[] levelButtons;
         [SerializeField] private Text[] levelButtonLabels;
+        [SerializeField] private ThemeManager themeManager;
+        [SerializeField] private Image panelBackground;
+        [SerializeField] private Text[] conceptHeaders;
 
         private void OnEnable()
         {
@@ -39,7 +43,12 @@ namespace BoardOfEducation
             if (selectPanel != null)
                 selectPanel.SetActive(true);
             if (titleText != null)
-                titleText.text = "Order Up! - Pick a Puzzle";
+                titleText.text = "Order Up! \u2014 Choose Your Quest";
+            if (panelBackground != null && themeManager != null && themeManager.ActiveTheme != null)
+            {
+                var t = themeManager.ActiveTheme;
+                panelBackground.color = new Color(t.backgroundBottom.r, t.backgroundBottom.g, t.backgroundBottom.b, 0.85f);
+            }
             RefreshButtons();
         }
 
@@ -56,8 +65,18 @@ namespace BoardOfEducation
             var concepts = new[] { ConceptType.Sequence, ConceptType.Procedure, ConceptType.Loop, ConceptType.Conditional };
             var buttonIndex = 0;
 
-            foreach (var concept in concepts)
+            for (int c = 0; c < concepts.Length; c++)
             {
+                var concept = concepts[c];
+                var theme = themeManager != null ? themeManager.GetThemeForConcept(concept) : null;
+
+                // Set concept header if available
+                if (conceptHeaders != null && c < conceptHeaders.Length && conceptHeaders[c] != null)
+                {
+                    conceptHeaders[c].text = theme != null ? theme.worldName : concept.ToString();
+                    conceptHeaders[c].color = theme != null ? theme.accentColor : Color.white;
+                }
+
                 var levels = levelManager.GetLevelsByConceptType(concept);
                 foreach (var level in levels)
                 {
@@ -70,9 +89,20 @@ namespace BoardOfEducation
 
                     if (label != null)
                     {
-                        var prefix = completed ? "* " : "";
-                        label.text = $"{prefix}{level.levelId}";
-                        label.color = unlocked ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+                        var prefix = completed ? "* " : unlocked ? "" : "~ ";
+                        label.text = $"{prefix}{level.levelName}";
+                        label.color = unlocked
+                            ? (theme != null ? theme.textColor : Color.white)
+                            : new Color(0.5f, 0.5f, 0.5f);
+                    }
+
+                    // Theme the button color
+                    var btnImage = btn.GetComponent<Image>();
+                    if (btnImage != null && theme != null)
+                    {
+                        btnImage.color = unlocked
+                            ? new Color(theme.primaryColor.r, theme.primaryColor.g, theme.primaryColor.b, 0.6f)
+                            : new Color(0.2f, 0.2f, 0.2f, 0.4f);
                     }
 
                     btn.interactable = unlocked;
