@@ -8,7 +8,7 @@
 
 ## Log
 
-*No errors logged yet.*
+| 2026-03-08 | Unity Editor shuts down on build | BoardBuild menu → Build Android APK | BoardBuild called `EditorApplication.Exit(1)` on failure, closing Editor | Only call `Exit(1)` when `Application.isBatchMode` (command-line builds) | Check `Application.isBatchMode` before Exit |
 
 ## Common Issues to Watch For
 

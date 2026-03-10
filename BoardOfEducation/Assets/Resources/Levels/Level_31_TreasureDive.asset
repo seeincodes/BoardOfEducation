@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 648059a156b3b421782adf6b4214d15d, type: 3}
+  m_Name: Level_31_TreasureDive
+  m_EditorClassIdentifier: 
+  levelId: 31
+  levelName: Treasure Dive
+  conceptType: 2
+  difficulty: 3
+  isTutorial: 0
+  taskDescription: 'Repeat: Dive, Grab Gem, Surface (x2)'
+  expectedSolution: 000000000100000002000000000000000100000002000000
+  pieceLabels:
+  - Dive
+  - Grab Gem
+  - Surface
+  slotBounds:
+  - serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0.33
+    height: 0.5
+  - serializedVersion: 2
+    x: 0.33
+    y: 0
+    width: 0.34
+    height: 0.5
+  - serializedVersion: 2
+    x: 0.67
+    y: 0
+    width: 0.33
+    height: 0.5
+  - serializedVersion: 2
+    x: 0
+    y: 0.5
+    width: 0.33
+    height: 0.5
+  - serializedVersion: 2
+    x: 0.33
+    y: 0.5
+    width: 0.34
+    height: 0.5
+  - serializedVersion: 2
+    x: 0.67
+    y: 0.5
+    width: 0.33
+    height: 0.5
+  hints: []
+  procedureGroupSizes: 
+  loopCount: 2
+  loopBodyLength: 3
+  conditionPrompt: 
+  branchA: 
+  branchB: 

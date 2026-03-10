@@ -28,6 +28,8 @@ See [SETUP.md](SETUP.md) for detailed setup. First-time Unity setup: [UNITY_SETU
 
 ## Build & Sideload
 
+**Full guide:** [BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md)
+
 ### Simulator (Development)
 
 - Play in Unity Editor → Board Simulator runs automatically
@@ -35,10 +37,10 @@ See [SETUP.md](SETUP.md) for detailed setup. First-time Unity setup: [UNITY_SETU
 
 ### Physical Board
 
-1. **Build target:** File → Build Settings → Android (Board runs Android)
-2. **Board settings:** Configure per [Board Build & Deploy](https://docs.dev.board.fun/reference/build-deploy)
-3. **Build:** Build and Run, or export APK
-4. **Sideload:** Install APK on Board (no app store required)
+1. **Build APK** — Board of Education → Build Android APK (or File → Build Settings → Build)
+2. **Download bdb** — [dev.board.fun](https://dev.board.fun/) → Board Developer Bridge
+3. **Connect Board** via USB → `./bdb install Build/BoardOfEducation.apk`
+4. **Launch** from Board home screen
 
 ## Project Structure
 

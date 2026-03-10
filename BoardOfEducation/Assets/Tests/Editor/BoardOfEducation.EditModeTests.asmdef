@@ -1,0 +1,23 @@
+{
+    "name": "BoardOfEducation.EditModeTests",
+    "rootNamespace": "BoardOfEducation.Tests",
+    "references": [
+        "BoardOfEducation.Runtime",
+        "GUID:7b790f10414f94c5fa22fbc78dbae3c6"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

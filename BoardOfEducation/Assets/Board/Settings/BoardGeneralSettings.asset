@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d58156f4145d49788ee1936d5292ce1, type: 3}
   m_Name: BoardGeneralSettings
   m_EditorClassIdentifier: 
-  m_ApplicationId: bcf3ccf1-43ef-49d2-b9ed-83a5e436945c
+  m_ApplicationId: 8a07a84f-63db-4bcb-9788-9218993b8d0d
   m_LogLevel: 15

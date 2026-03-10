@@ -1,7 +1,9 @@
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace BoardOfEducation.Editor
 {
@@ -15,6 +17,49 @@ namespace BoardOfEducation.Editor
         private const string BuildDir = "Build";
         private const string ApkName = "BoardOfEducation.apk";
 
+        [MenuItem("Board of Education/Create Starter Scene")]
+        public static void CreateStarterScene()
+        {
+            var scenesDir = "Assets/Scenes";
+            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
+                AssetDatabase.CreateFolder("Assets", "Scenes");
+            var scenePath = $"{scenesDir}/Game.unity";
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+            if (!EditorSceneManager.SaveScene(scene, scenePath))
+            {
+                EditorUtility.DisplayDialog("Error", "Could not save scene.", "OK");
+                return;
+            }
+            var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            if (!scenes.Exists(s => s.path == scenePath))
+            {
+                scenes.Add(new EditorBuildSettingsScene(scenePath, true));
+                EditorBuildSettings.scenes = scenes.ToArray();
+            }
+            AssetDatabase.Refresh();
+            EditorUtility.DisplayDialog("Starter Scene Created", $"Saved {scenePath} and added to Build Settings.\n\nYou can now use Board of Education → Build Android APK.", "OK");
+        }
+
+        [MenuItem("Board of Education/Add Open Scene to Build Settings")]
+        public static void AddOpenSceneToBuild()
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || string.IsNullOrEmpty(scene.path))
+            {
+                EditorUtility.DisplayDialog("No Saved Scene", "Save your scene first: File → Save As → Assets/Scenes/Game.unity", "OK");
+                return;
+            }
+            var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            if (scenes.Exists(s => s.path == scene.path))
+            {
+                EditorUtility.DisplayDialog("Already Added", "This scene is already in Build Settings.", "OK");
+                return;
+            }
+            scenes.Add(new EditorBuildSettingsScene(scene.path, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
+            EditorUtility.DisplayDialog("Scene Added", $"Added {scene.name} to Build Settings.", "OK");
+        }
+
         [MenuItem("Board of Education/Build Android APK")]
         public static void BuildAndroidFromMenu()
         {
@@ -24,11 +69,19 @@ namespace BoardOfEducation.Editor
         /// <summary>Entry point for command-line builds (-executeMethod BoardOfEducation.Editor.BoardBuild.BuildAndroid)</summary>
         public static void BuildAndroid()
         {
+            // Auto-bootstrap: ensure the scene has game content before building
+            EnsureSceneBootstrapped();
+
             var scenes = GetEnabledScenes();
             if (scenes.Length == 0)
             {
-                Debug.LogError("[BoardBuild] No scenes in Build Settings. Add your game scene first.");
-                EditorApplication.Exit(1);
+                TryAutoAddScenes();
+                scenes = GetEnabledScenes();
+            }
+            if (scenes.Length == 0)
+            {
+                Debug.LogError("[BoardBuild] No scenes in Build Settings. Add your game scene: File → Build Settings → Add Open Scenes (or drag a scene from Project).");
+                if (Application.isBatchMode) EditorApplication.Exit(1);
                 return;
             }
 
@@ -53,7 +106,7 @@ namespace BoardOfEducation.Editor
             else
             {
                 Debug.LogError($"[BoardBuild] Build failed: {summary.result}");
-                EditorApplication.Exit(1);
+                if (Application.isBatchMode) EditorApplication.Exit(1);
             }
         }
 
@@ -66,6 +119,44 @@ namespace BoardOfEducation.Editor
                     scenes.Add(scene.path);
             }
             return scenes.ToArray();
+        }
+
+        private static void EnsureSceneBootstrapped()
+        {
+            // Check if GameManager exists in the scene - if not, scene needs bootstrapping
+            var gameScene = EditorSceneManager.OpenScene("Assets/Scenes/Game.unity", OpenSceneMode.Single);
+            var hasGameManager = false;
+            foreach (var go in gameScene.GetRootGameObjects())
+            {
+                if (go.GetComponent<GameManager>() != null)
+                {
+                    hasGameManager = true;
+                    break;
+                }
+            }
+            if (!hasGameManager)
+            {
+                Debug.Log("[BoardBuild] Scene is empty — running SceneBootstrapper...");
+                SceneBootstrapper.Bootstrap();
+            }
+        }
+
+        private static void TryAutoAddScenes()
+        {
+            var guids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets" });
+            if (guids.Length == 0) return;
+            var sceneList = new System.Collections.Generic.List<EditorBuildSettingsScene>();
+            foreach (var guid in guids)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!string.IsNullOrEmpty(path))
+                    sceneList.Add(new EditorBuildSettingsScene(path, true));
+            }
+            if (sceneList.Count > 0)
+            {
+                EditorBuildSettings.scenes = sceneList.ToArray();
+                Debug.Log($"[BoardBuild] Auto-added {sceneList.Count} scene(s) to Build Settings.");
+            }
         }
     }
 }

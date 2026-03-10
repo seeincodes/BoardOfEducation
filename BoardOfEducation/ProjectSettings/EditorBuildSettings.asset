@@ -4,5 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
-  m_configObjects: {}
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Game.unity
+    guid: f5b8e181cfb664342a1ac9f6ae478aca
+  m_configObjects:
+    fun.board.input.settings: {fileID: 11400000, guid: caf8445f291c1401abb3f26b58d97797, type: 2}
+    fun.board.settings: {fileID: 11400000, guid: a884a3d48b9ec452d9b92517fa7ec5f7, type: 2}

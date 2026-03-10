@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 648059a156b3b421782adf6b4214d15d, type: 3}
+  m_Name: Level_20_BuildaShield
+  m_EditorClassIdentifier: 
+  levelId: 20
+  levelName: Build a Shield
+  conceptType: 1
+  difficulty: 2
+  isTutorial: 0
+  taskDescription: 'Group the steps: [Cut Wood, Shape It] then [Add Handle, Paint
+    It]'
+  expectedSolution: 00000000010000000200000003000000
+  pieceLabels:
+  - Cut Wood
+  - Shape It
+  - Add Handle
+  - Paint It
+  slotBounds:
+  - serializedVersion: 2
+    x: 0
+    y: 0
+    width: 0.5
+    height: 0.5
+  - serializedVersion: 2
+    x: 0.5
+    y: 0
+    width: 0.5
+    height: 0.5
+  - serializedVersion: 2
+    x: 0
+    y: 0.5
+    width: 0.5
+    height: 0.5
+  - serializedVersion: 2
+    x: 0.5
+    y: 0.5
+    width: 0.5
+    height: 0.5
+  hints: []
+  procedureGroupSizes: 0200000002000000
+  loopCount: 2
+  loopBodyLength: 2
+  conditionPrompt: 
+  branchA: 
+  branchB: 

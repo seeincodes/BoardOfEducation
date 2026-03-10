@@ -62,7 +62,7 @@ SuperBuilders/
 | Mode               | How                                                                                  |
 | ------------------ | ------------------------------------------------------------------------------------ |
 | **Simulator**      | Press Play in Unity Editor — Board Simulator runs automatically                      |
-| **Physical Board** | Build Android APK → sideload to Board (menu: Board of Education → Build Android APK) |
+| **Physical Board** | See [BUILD_AND_DEPLOY.md](BoardOfEducation/BUILD_AND_DEPLOY.md) — Build APK → use bdb to install via USB |
 
 ---
 
@@ -73,6 +73,7 @@ SuperBuilders/
 | [BoardOfEducation/README.md](BoardOfEducation/README.md)                               | Unity project overview            |
 | [BoardOfEducation/SETUP.md](BoardOfEducation/SETUP.md)                                 | Detailed setup and scene creation |
 | [BoardOfEducation/UNITY_SETUP_CHECKLIST.md](BoardOfEducation/UNITY_SETUP_CHECKLIST.md) | First-time Unity checklist        |
+| [BoardOfEducation/BUILD_AND_DEPLOY.md](BoardOfEducation/BUILD_AND_DEPLOY.md)           | Package and test on physical Board |
 | [GAME_DESIGN.md](GAME_DESIGN.md)                                                       | Puzzle concept (Order Up!)        |
 | [SUBMISSION.md](SUBMISSION.md)                                                         | Submission and packaging          |
 | [docs.dev.board.fun](https://docs.dev.board.fun/)                                      | Board SDK documentation           |

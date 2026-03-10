@@ -1,0 +1,16 @@
+{
+    "name": "BoardOfEducation.Runtime",
+    "rootNamespace": "BoardOfEducation",
+    "references": [
+        "GUID:7b790f10414f94c5fa22fbc78dbae3c6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

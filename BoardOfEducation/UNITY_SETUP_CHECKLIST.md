@@ -18,10 +18,9 @@ Complete these steps when opening the project in Unity for the first time.
 
 ## 3. Configure Board Project Settings
 
-1. Edit → Project Settings
-2. Look for **Board** or **Board SDK** section (if present)
-3. Configure per [docs.dev.board.fun](https://docs.dev.board.fun/)
-4. Ensure piece set model is set (e.g., Arcade) if required
+1. **Board → Configure Unity Project...** — Runs the Board setup wizard (fixes API level, ARM64, etc.)
+2. **Piece Set Model:** Edit → Project Settings → Board → Input Settings → Piece Set Model = `arcade_v1.3.7.tflite` (or select from dropdown if available)
+3. Ensure `Assets/StreamingAssets/arcade_v1.3.7.tflite` exists (download from [dev.board.fun](https://dev.board.fun/) if missing)
 
 ## 4. Add Scenes to Build
 
