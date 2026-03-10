@@ -32,7 +32,7 @@ namespace BoardOfEducation.Tests
         }
 
         [Test]
-        public void EnsureBoardUIInputModule_SetsForceModuleActive()
+        public void EnsureBoardUIInputModule_SetsForceModuleActiveBasedOnInputBackend()
         {
             _eventSystemGo = new GameObject("EventSystem");
             _eventSystemGo.AddComponent<EventSystem>();
@@ -41,8 +41,8 @@ namespace BoardOfEducation.Tests
 
             var boardModule = _eventSystemGo.GetComponent<BoardUIInputModule>();
             Assert.IsNotNull(boardModule);
-            Assert.IsTrue(boardModule.forceModuleActive,
-                "forceModuleActive must be true so the module works in Editor and on hardware");
+            Assert.AreEqual(ExpectedForceModuleActive(), boardModule.forceModuleActive,
+                "forceModuleActive should be disabled for Input System-only editor setups.");
         }
 
         [Test]
@@ -99,6 +99,15 @@ namespace BoardOfEducation.Tests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             Assert.IsNotNull(method, "EnsureBoardUIInputModule method not found");
             method.Invoke(null, null);
+        }
+
+        private static bool ExpectedForceModuleActive()
+        {
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+            return false;
+#else
+            return true;
+#endif
         }
     }
 }

@@ -7,16 +7,18 @@ using BoardOfEducation.Validators;
 using BoardOfEducation.Visuals;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace BoardOfEducation
 {
     public class GameManager : MonoBehaviour
     {
         private const int GameplayGlyphBucketCount = 4;
+        private static Sprite s_RuntimeUiSprite;
 
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private bool logFingerTouches = false;
-        [SerializeField] private bool logGlyphProbe = true;
+        [SerializeField] private bool logGlyphProbe = false;
         [SerializeField] private InstructionsUI instructionsUI;
         [SerializeField] private HowToPlayUI howToPlayUI;
         [SerializeField] private LandingScreenUI landingScreenUI;
@@ -25,6 +27,7 @@ namespace BoardOfEducation
         [SerializeField] private SlotVisualizer slotVisualizer;
         [SerializeField] private TransitionManager transitionManager;
         [SerializeField] private RectTransform gameCanvas;
+        [SerializeField] private Button backButton;
 
         public event Action<int, int, bool> OnPiecePlaced;
         public event Action OnPuzzleSolved;
@@ -42,6 +45,14 @@ namespace BoardOfEducation
         private readonly HashSet<int> _loggedGlyphContactIds = new HashSet<int>();
         private readonly HashSet<int> _loggedAnyContactIds = new HashSet<int>();
         private float _nextProbeHeartbeatTime;
+        private LevelSelectUI _levelSelectUI;
+
+        private void Awake()
+        {
+            // Configure input modules before first frame Update to avoid
+            // BoardUIInputModule fake-input path on Input System-only projects.
+            EnsureBoardUIInputModule();
+        }
 
         private void Start()
         {
@@ -50,13 +61,14 @@ namespace BoardOfEducation
             if (logGlyphProbe)
                 Debug.LogWarning("[Order Up!][GlyphProbe] enabled - place pieces to see glyphId mapping logs.");
 
-            EnsureBoardUIInputModule();
-
 #if UNITY_ANDROID && !UNITY_EDITOR
             BoardApplication.SetPauseScreenContext(applicationName: "Board of Education", showSaveOptionUponExit: false);
 #endif
             if (instructionsUI == null) instructionsUI = GetComponent<InstructionsUI>();
             if (levelManager == null) levelManager = GetComponent<LevelManager>();
+            _levelSelectUI = FindObjectOfType<LevelSelectUI>();
+
+            EnsureBackButton();
 
             levelManager.OnLevelStarted += HandleLevelStarted;
             levelManager.OnLevelCompleted += HandleLevelCompleted;
@@ -150,7 +162,7 @@ namespace BoardOfEducation
                 }
             }
 
-            instructionsUI?.Show(config.taskDescription);
+            instructionsUI?.Show(GetLevelInstructionText(config));
             OnLevelStarted?.Invoke(config);
 
             Debug.Log($"[Order Up!] Level {config.levelId}: {config.levelName} ({config.conceptType})");
@@ -164,6 +176,7 @@ namespace BoardOfEducation
         private void HandleShowLevelSelect()
         {
             _inputEnabled = false;
+            UpdateBackButtonVisibility();
             OnShowLevelSelect?.Invoke();
         }
 
@@ -175,6 +188,21 @@ namespace BoardOfEducation
         public void ShowLandingScreen()
         {
             landingScreenUI?.Show();
+            UpdateBackButtonVisibility();
+        }
+
+        private static string GetLevelInstructionText(LevelConfig config)
+        {
+            if (config != null && config.isTutorial && config.levelId == 0)
+            {
+                return "How to Play:\n" +
+                       "1) Place pieces in order: 1, 2, 3, 4.\n" +
+                       "2) Color order: Yellow, Purple, Orange, Pink.\n" +
+                       "3) Move a piece into a glowing slot.\n" +
+                       "4) If wrong, lift it and try again.";
+            }
+
+            return config?.taskDescription ?? "Place the pieces in order!";
         }
 
         private void OnValidatorPiecePlaced(int slotIndex, int glyphId)
@@ -203,7 +231,6 @@ namespace BoardOfEducation
             if (logGlyphProbe)
             {
                 ProbeGlyphContactsForMapping();
-                ProbeAllContactsForMapping();
             }
 
             if (_levelCompleteTimer > 0)
@@ -213,6 +240,8 @@ namespace BoardOfEducation
                     levelManager.CompleteCurrentLevel();
                 return;
             }
+
+            UpdateBackButtonVisibility();
 
             if (!_inputEnabled || _validator == null) return;
 
@@ -256,46 +285,9 @@ namespace BoardOfEducation
             }
         }
 
-        private void ProbeAllContactsForMapping()
-        {
-            if (Time.unscaledTime >= _nextProbeHeartbeatTime)
-            {
-                _nextProbeHeartbeatTime = Time.unscaledTime + 3f;
-                var allCount = CountContacts(BoardInput.GetActiveContacts());
-                var glyphCount = CountContacts(BoardInput.GetActiveContacts(BoardContactType.Glyph));
-                var fingerCount = CountContacts(BoardInput.GetActiveContacts(BoardContactType.Finger));
-                Debug.LogWarning(
-                    $"[Order Up!][GlyphProbe] heartbeat all={allCount}, glyph={glyphCount}, finger={fingerCount}");
-            }
-
-            foreach (var contact in BoardInput.GetActiveContacts())
-            {
-                if (contact.phase == BoardContactPhase.Began)
-                {
-                    if (_loggedAnyContactIds.Contains(contact.contactId)) continue;
-                    _loggedAnyContactIds.Add(contact.contactId);
-                    Debug.LogWarning(
-                        $"[Order Up!][GlyphProbe][Any] began glyphId={contact.glyphId} " +
-                        $"contactId={contact.contactId} touched={contact.isTouched} " +
-                        $"pos=({contact.screenPosition.x:F0},{contact.screenPosition.y:F0})");
-                }
-                else if (contact.phase == BoardContactPhase.Ended || contact.phase == BoardContactPhase.Canceled)
-                {
-                    _loggedAnyContactIds.Remove(contact.contactId);
-                    Debug.LogWarning(
-                        $"[Order Up!][GlyphProbe][Any] ended glyphId={contact.glyphId} " +
-                        $"contactId={contact.contactId}");
-                }
-            }
-        }
-
-        private static int CountContacts(IEnumerable<BoardContact> contacts)
-        {
-            var count = 0;
-            foreach (var _ in contacts)
-                count++;
-            return count;
-        }
+        // Intentionally no "all contacts" probe in production runtime. On some Board
+        // hardware/SDK states this can produce invalid native contact payloads and
+        // noisy exceptions that interfere with gameplay.
 
         private void ProcessGlyphContact(BoardContact contact)
         {
@@ -409,6 +401,106 @@ namespace BoardOfEducation
                 _logger.Log("touch", pieceId, action, position, orientationDegrees, _gameState);
         }
 
+        private void EnsureBackButton()
+        {
+            if (backButton != null)
+            {
+                backButton.onClick.RemoveListener(OnBackButtonPressed);
+                backButton.onClick.AddListener(OnBackButtonPressed);
+                UpdateBackButtonVisibility();
+                return;
+            }
+
+            if (gameCanvas == null) return;
+
+            var buttonObject = new GameObject("BackButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            buttonObject.transform.SetParent(gameCanvas, false);
+            var buttonRect = (RectTransform)buttonObject.transform;
+            buttonRect.anchorMin = new Vector2(0f, 1f);
+            buttonRect.anchorMax = new Vector2(0f, 1f);
+            buttonRect.pivot = new Vector2(0f, 1f);
+            buttonRect.anchoredPosition = new Vector2(24f, -24f);
+            buttonRect.sizeDelta = new Vector2(150f, 56f);
+
+            var buttonImage = buttonObject.GetComponent<Image>();
+            buttonImage.sprite = GetRuntimeUiSprite();
+            buttonImage.color = new Color(0.12f, 0.14f, 0.22f, 0.9f);
+
+            backButton = buttonObject.GetComponent<Button>();
+            backButton.targetGraphic = buttonImage;
+            backButton.onClick.AddListener(OnBackButtonPressed);
+
+            var labelObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            labelObject.transform.SetParent(buttonObject.transform, false);
+            var labelRect = (RectTransform)labelObject.transform;
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+
+            var label = labelObject.GetComponent<Text>();
+            label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            label.fontSize = 24;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.color = Color.white;
+            label.raycastTarget = false;
+            label.text = "Back";
+
+            UpdateBackButtonVisibility();
+        }
+
+        private void OnBackButtonPressed()
+        {
+            if (!_inputEnabled) return;
+
+            _logger?.LogSystem("exit_level", _gameState);
+            _inputEnabled = false;
+            _levelCompleteTimer = -1f;
+
+            if (_validator != null)
+            {
+                for (var slotIndex = 0; slotIndex < _validator.SlotCount; slotIndex++)
+                {
+                    _validator.ClearSlot(slotIndex);
+                    slotVisualizer?.ResetSlot(slotIndex);
+                }
+            }
+
+            _previousContacts.Clear();
+            _contactToSlot.Clear();
+            _gameState = "landing";
+
+            instructionsUI?.Hide();
+            howToPlayUI?.Hide();
+            _levelSelectUI?.Hide();
+            landingScreenUI?.Show();
+
+            UpdateBackButtonVisibility();
+        }
+
+        private void UpdateBackButtonVisibility()
+        {
+            if (backButton == null) return;
+
+            var shouldShow = _inputEnabled &&
+                             levelManager != null &&
+                             levelManager.CurrentLevel != null;
+            backButton.gameObject.SetActive(shouldShow);
+        }
+
+        private static Sprite GetRuntimeUiSprite()
+        {
+            if (s_RuntimeUiSprite != null)
+                return s_RuntimeUiSprite;
+
+            var texture = Texture2D.whiteTexture;
+            s_RuntimeUiSprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f));
+            return s_RuntimeUiSprite;
+        }
+
         private static void EnsureBoardUIInputModule()
         {
             var eventSystem = FindObjectOfType<EventSystem>();
@@ -422,11 +514,20 @@ namespace BoardOfEducation
             if (boardModule == null)
                 boardModule = eventSystem.gameObject.AddComponent<BoardUIInputModule>();
 
-            // Force active so the module works in both Editor (mouse via FakeTouches)
-            // and on Board hardware (Board contacts). Without this, the module won't
-            // activate when BoardSupport.enabled is false.
-            boardModule.forceModuleActive = true;
+            var inputSystemOnly = IsInputSystemOnly();
+            // In Input System-only projects, BoardUIInputModule's fake input path uses
+            // legacy UnityEngine.Input and throws. Disable that path in non-Board contexts.
+            boardModule.forceModuleActive = !inputSystemOnly;
+            if (inputSystemOnly && !BoardSupport.enabled)
+                boardModule.enabled = false;
+            else
+                boardModule.enabled = true;
             ConfigureBoardInputMask(boardModule);
+
+            if (inputSystemOnly)
+            {
+                EnsureInputSystemUiModule(eventSystem.gameObject);
+            }
 
             Debug.Log($"[Order Up!] BoardUIInputModule active={boardModule.IsActive()}, " +
                       $"forceModuleActive={boardModule.forceModuleActive}, " +
@@ -435,6 +536,31 @@ namespace BoardOfEducation
             var standaloneModule = eventSystem.GetComponent<StandaloneInputModule>();
             if (standaloneModule != null)
                 standaloneModule.enabled = false;
+        }
+
+        private static bool IsInputSystemOnly()
+        {
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+            return true;
+#else
+            return false;
+#endif
+        }
+
+        private static void EnsureInputSystemUiModule(GameObject eventSystemObject)
+        {
+            if (eventSystemObject == null) return;
+
+            // Avoid hard dependency on UnityEngine.InputSystem.UI assembly.
+            var moduleType = Type.GetType("UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
+            if (moduleType == null) return;
+
+            var existing = eventSystemObject.GetComponent(moduleType) as UIBehaviour;
+            if (existing == null)
+                existing = eventSystemObject.AddComponent(moduleType) as UIBehaviour;
+
+            if (existing != null)
+                existing.enabled = true;
         }
 
         private static void ConfigureBoardInputMask(BoardUIInputModule boardModule)
@@ -533,6 +659,8 @@ namespace BoardOfEducation
                 landingScreenUI.OnPlayPressed -= OnLandingPlayPressed;
                 landingScreenUI.OnHowToPlayPressed -= OnLandingHowToPlayPressed;
             }
+            if (backButton != null)
+                backButton.onClick.RemoveListener(OnBackButtonPressed);
             if (levelManager != null)
             {
                 levelManager.OnLevelStarted -= HandleLevelStarted;

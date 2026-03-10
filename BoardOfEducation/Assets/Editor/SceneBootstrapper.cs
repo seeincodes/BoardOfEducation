@@ -116,7 +116,7 @@ namespace BoardOfEducation.Editor
                 var eventSystemGo = new GameObject("EventSystem");
                 eventSystemGo.AddComponent<UnityEngine.EventSystems.EventSystem>();
                 var boardInputModule = eventSystemGo.AddComponent<BoardUIInputModule>();
-                boardInputModule.forceModuleActive = true;
+                boardInputModule.forceModuleActive = !IsInputSystemOnly();
                 var boardInputSO = new SerializedObject(boardInputModule);
                 var inputMaskBits = boardInputSO.FindProperty("m_InputMask.m_Bits");
                 if (inputMaskBits != null)
@@ -124,6 +124,9 @@ namespace BoardOfEducation.Editor
                     inputMaskBits.intValue = -1;
                     boardInputSO.ApplyModifiedPropertiesWithoutUndo();
                 }
+
+                if (IsInputSystemOnly())
+                    EnsureInputSystemUiModule(eventSystemGo);
             }
 
             var canvasRT = canvasGo.GetComponent<RectTransform>();
@@ -713,6 +716,26 @@ namespace BoardOfEducation.Editor
             text.font = GetBuiltinFont();
 
             return btnGo;
+        }
+
+        private static bool IsInputSystemOnly()
+        {
+#if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
+            return true;
+#else
+            return false;
+#endif
+        }
+
+        private static void EnsureInputSystemUiModule(GameObject eventSystemObject)
+        {
+            if (eventSystemObject == null) return;
+
+            var moduleType = System.Type.GetType("UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
+            if (moduleType == null) return;
+
+            if (eventSystemObject.GetComponent(moduleType) == null)
+                eventSystemObject.AddComponent(moduleType);
         }
     }
 }

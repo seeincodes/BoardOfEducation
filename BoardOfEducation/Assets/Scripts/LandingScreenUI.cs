@@ -10,6 +10,8 @@ namespace BoardOfEducation
     public class LandingScreenUI : MonoBehaviour
     {
         private static readonly int[] AllowedStartGlyphIds = { 0, 1, 2, 3 };
+        private const float StartSwipeThresholdPixels = 160f;
+        private static Sprite s_RuntimeUiSprite;
         private static readonly Color[] StartGlyphColors =
         {
             new Color(0.98f, 0.89f, 0.22f), // yellow
@@ -27,6 +29,7 @@ namespace BoardOfEducation
 
         private bool _loggedInputState;
         private readonly HashSet<int> _consumedFingerContacts = new HashSet<int>();
+        private readonly Dictionary<int, Vector2> _glyphStartPositions = new Dictionary<int, Vector2>();
         private Func<bool> _hasRequiredStartGlyphOverride;
         private Text _startHintText;
         private readonly List<Image> _startGlyphChipImages = new List<Image>();
@@ -37,8 +40,6 @@ namespace BoardOfEducation
             Debug.Log($"[Order Up!] LandingScreen.Awake() playButton={playButton != null}, " +
                       $"howToPlayButton={howToPlayButton != null}, landingPanel={landingPanel != null}");
 
-            if (playButton != null)
-                playButton.onClick.AddListener(HandlePlay);
             if (howToPlayButton != null)
                 howToPlayButton.onClick.AddListener(HandleHowToPlay);
 
@@ -47,8 +48,6 @@ namespace BoardOfEducation
 
         private void OnDestroy()
         {
-            if (playButton != null)
-                playButton.onClick.RemoveListener(HandlePlay);
             if (howToPlayButton != null)
                 howToPlayButton.onClick.RemoveListener(HandleHowToPlay);
         }
@@ -59,7 +58,12 @@ namespace BoardOfEducation
             UpdateStartHintState(hasStartGlyph);
 
             if (playButton != null)
-                playButton.interactable = hasStartGlyph;
+            {
+                playButton.interactable = false;
+                playButton.gameObject.SetActive(false);
+            }
+
+            ProcessGlyphSwipeToStart();
 
             if (!_loggedInputState)
             {
@@ -84,6 +88,7 @@ namespace BoardOfEducation
             Debug.Log("[Order Up!] LandingScreen.Show()");
             if (landingPanel != null)
                 landingPanel.SetActive(true);
+            _glyphStartPositions.Clear();
         }
 
         public void Hide()
@@ -134,13 +139,6 @@ namespace BoardOfEducation
 
         private bool TryHandleFingerTap(Vector2 screenPosition)
         {
-            if (IsButtonHit(playButton, screenPosition))
-            {
-                Debug.Log("[Order Up!] Board touch fallback triggered Play.");
-                HandlePlay();
-                return true;
-            }
-
             if (IsButtonHit(howToPlayButton, screenPosition))
             {
                 Debug.Log("[Order Up!] Board touch fallback triggered HowToPlay.");
@@ -149,6 +147,58 @@ namespace BoardOfEducation
             }
 
             return false;
+        }
+
+        private void ProcessGlyphSwipeToStart()
+        {
+            if (landingPanel == null || !landingPanel.activeInHierarchy) return;
+
+            var activeGlyphIds = new HashSet<int>();
+            foreach (var contact in BoardInput.GetActiveContacts(BoardContactType.Glyph))
+            {
+                if (!IsAllowedStartGlyph(contact.glyphId) || !IsValidBoardGlyphContact(contact))
+                    continue;
+
+                activeGlyphIds.Add(contact.contactId);
+                switch (contact.phase)
+                {
+                    case BoardContactPhase.Began:
+                        _glyphStartPositions[contact.contactId] = contact.screenPosition;
+                        break;
+                    case BoardContactPhase.Moved:
+                    case BoardContactPhase.Stationary:
+                        if (_glyphStartPositions.TryGetValue(contact.contactId, out var startPos) &&
+                            IsSwipeToPlay(startPos, contact.screenPosition))
+                        {
+                            Debug.Log("[Order Up!] Swipe-to-play detected.");
+                            _glyphStartPositions.Clear();
+                            HandlePlay();
+                            return;
+                        }
+                        break;
+                    case BoardContactPhase.Ended:
+                    case BoardContactPhase.Canceled:
+                        _glyphStartPositions.Remove(contact.contactId);
+                        break;
+                }
+            }
+
+            // Remove stale tracked glyphs that are no longer on the board.
+            var keysToRemove = new List<int>();
+            foreach (var trackedContactId in _glyphStartPositions.Keys)
+            {
+                if (!activeGlyphIds.Contains(trackedContactId))
+                    keysToRemove.Add(trackedContactId);
+            }
+
+            foreach (var trackedContactId in keysToRemove)
+                _glyphStartPositions.Remove(trackedContactId);
+        }
+
+        private static bool IsSwipeToPlay(Vector2 start, Vector2 current)
+        {
+            var delta = current - start;
+            return delta.y >= StartSwipeThresholdPixels && Mathf.Abs(delta.y) > Mathf.Abs(delta.x) * 1.25f;
         }
 
         private static bool IsButtonHit(Button button, Vector2 screenPosition)
@@ -165,7 +215,7 @@ namespace BoardOfEducation
 
             foreach (var contact in BoardInput.GetActiveContacts(BoardContactType.Glyph))
             {
-                if (IsAllowedStartGlyph(contact.glyphId))
+                if (IsAllowedStartGlyph(contact.glyphId) && IsValidBoardGlyphContact(contact))
                     return true;
             }
 
@@ -177,6 +227,19 @@ namespace BoardOfEducation
             // Board Arcade can emit more than 4 glyph IDs for shape variants;
             // treat any recognized glyph contact as valid for starting the game.
             return glyphId >= 0;
+        }
+
+        private static bool IsValidBoardGlyphContact(BoardContact contact)
+        {
+            if (contact.contactId < 0) return false;
+            if (contact.phase == BoardContactPhase.Ended || contact.phase == BoardContactPhase.Canceled) return false;
+
+            var pos = contact.screenPosition;
+            if (float.IsNaN(pos.x) || float.IsNaN(pos.y) || float.IsInfinity(pos.x) || float.IsInfinity(pos.y))
+                return false;
+
+            // Ignore invalid ghost contacts that report origin/out-of-bounds positions.
+            return pos.x >= 0f && pos.x <= Screen.width && pos.y >= 0f && pos.y <= Screen.height;
         }
 
         private void EnsureStartHintUI()
@@ -214,7 +277,7 @@ namespace BoardOfEducation
             chipsLayout.childForceExpandHeight = false;
             chipsLayout.childForceExpandWidth = false;
 
-            var chipSprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
+            var chipSprite = GetRuntimeUiSprite();
             var defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");
             for (var i = 0; i < StartGlyphColors.Length; i++)
             {
@@ -287,13 +350,26 @@ namespace BoardOfEducation
             if (hasStartGlyph)
             {
                 _startHintText.color = new Color(0.64f, 1f, 0.64f);
-                _startHintText.text = "Piece detected! Tap Play to begin.";
+                _startHintText.text = "Piece detected! Slide a piece up to start.";
             }
             else
             {
                 _startHintText.color = new Color(1f, 0.96f, 0.9f);
-                _startHintText.text = "Place one of these pieces on the board to unlock Play.";
+                _startHintText.text = "Place one of these pieces, then slide up to start.";
             }
+        }
+
+        private static Sprite GetRuntimeUiSprite()
+        {
+            if (s_RuntimeUiSprite != null)
+                return s_RuntimeUiSprite;
+
+            var texture = Texture2D.whiteTexture;
+            s_RuntimeUiSprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f));
+            return s_RuntimeUiSprite;
         }
     }
 }

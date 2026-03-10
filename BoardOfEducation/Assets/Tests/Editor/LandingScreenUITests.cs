@@ -63,28 +63,28 @@ namespace BoardOfEducation.Tests
         }
 
         [Test]
-        public void PlayButton_WithoutRequiredGlyph_DoesNotStartGame()
+        public void HandlePlay_WithoutRequiredGlyph_DoesNotStartGame()
         {
             bool playPressed = false;
             _ui.OnPlayPressed += () => playPressed = true;
             _simulateStartGlyphOnBoard = false;
 
             _ui.Show();
-            _playButton.onClick.Invoke();
+            InvokePrivateMethod(_ui, "HandlePlay");
 
             Assert.IsTrue(_panel.activeSelf, "Panel should stay visible when no required glyph is on board");
             Assert.IsFalse(playPressed, "OnPlayPressed should not fire without required glyph");
         }
 
         [Test]
-        public void PlayButton_WithRequiredGlyph_HidesPanelAndFiresEvent()
+        public void HandlePlay_WithRequiredGlyph_HidesPanelAndFiresEvent()
         {
             bool playPressed = false;
             _ui.OnPlayPressed += () => playPressed = true;
             _simulateStartGlyphOnBoard = true;
 
             _ui.Show();
-            _playButton.onClick.Invoke();
+            InvokePrivateMethod(_ui, "HandlePlay");
 
             Assert.IsFalse(_panel.activeSelf, "Panel should hide after Play pressed with required glyph present");
             Assert.IsTrue(playPressed, "OnPlayPressed event should fire with required glyph present");
