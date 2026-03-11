@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Text;
 using BoardOfEducation.Game;
 using BoardOfEducation.UI;
 using UnityEngine;
@@ -64,6 +65,48 @@ namespace BoardOfEducation.Core
 
             _state = GameState.ShowingLevel;
             Debug.Log($"[RoadBuilder] Loaded level {levelIndex + 1}: {_currentGrid.LevelName} ({_currentGrid.RequiredPieces} pieces)");
+        }
+
+        private void Update()
+        {
+            if (_pieceTracker == null || _statusDisplay == null) return;
+
+            var pieces = _pieceTracker.ActivePieces;
+            var sb = new StringBuilder();
+            sb.Append($"Pieces on board: {pieces.Count}");
+
+            if (pieces.Count > 0)
+            {
+                var slotGlyphs = _slotManager.GetSlotGlyphIds();
+                foreach (var kvp in pieces)
+                {
+                    var p = kvp.Value;
+                    string cmdName;
+                    if (CommandMapping.TryGetCommand(p.GlyphId, out var cmd))
+                        cmdName = CommandMapping.GetCommandName(cmd);
+                    else
+                        cmdName = $"Unknown({p.GlyphId})";
+
+                    // Find which slot this piece is in (if any)
+                    int slotIndex = -1;
+                    if (slotGlyphs != null)
+                    {
+                        for (int i = 0; i < slotGlyphs.Length; i++)
+                        {
+                            if (slotGlyphs[i] == p.GlyphId)
+                            {
+                                slotIndex = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    string slotStr = slotIndex >= 0 ? $" -> Slot {slotIndex + 1}" : "";
+                    sb.Append($"\n  {cmdName}{slotStr}");
+                }
+            }
+
+            _statusDisplay.SetPieceInfo(sb.ToString());
         }
 
         private void OnSlotsFilled()

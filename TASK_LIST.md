@@ -93,9 +93,9 @@ Arcade pieces to program a robot's path through grid levels.
 - **Test:** Place each Arcade piece type → correct command appears in slot display
 
 ### F3.2 — Add on-screen piece count & active piece list
-- [ ] Show "Pieces on board: N" live counter below the status display
-- [ ] List each active piece with its glyph type and assigned slot (if any)
-- [ ] Helps players understand which pieces the board sees
+- [x] Show "Pieces on board: N" live counter below the status display
+- [x] List each active piece with its glyph type and assigned slot (if any)
+- [x] Helps players understand which pieces the board sees
 - **Files:** `Assets/Scripts/UI/StatusDisplay.cs`, `Assets/Scripts/Core/RoadBuilderGameController.cs`
 - **Test:** Place/lift pieces → counter updates in real time, piece list is accurate
 

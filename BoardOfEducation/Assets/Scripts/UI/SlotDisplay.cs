@@ -15,9 +15,14 @@ namespace BoardOfEducation.UI
         private Image[] _slotImages;
         private Text[] _slotLabels;
         private Text _instructionText;
+        private GameObject _legendRoot;
 
         private static readonly Color EmptySlotColor = new Color(0.4f, 0.4f, 0.5f, 0.4f);
         private static readonly Color FilledSlotColor = new Color(0.3f, 0.8f, 0.4f, 0.6f);
+
+        // Piece icon resource names, indexed by glyph ID
+        private static readonly string[] PieceIconNames = { "RobotYellow", "RobotPurple", "RobotOrange", "RobotPink" };
+        private static readonly string[] PieceColorNames = { "Yellow", "Purple", "Orange", "Pink" };
 
         public void Initialize(Canvas canvas, SequenceSlotManager slotManager)
         {
@@ -26,6 +31,7 @@ namespace BoardOfEducation.UI
 
             BuildSlotVisuals();
             CreateInstructionText();
+            CreatePieceLegend();
         }
 
         private void BuildSlotVisuals()
@@ -115,6 +121,72 @@ namespace BoardOfEducation.UI
             rt.offsetMax = Vector2.zero;
         }
 
+        private void CreatePieceLegend()
+        {
+            _legendRoot = new GameObject("PieceLegend");
+            _legendRoot.transform.SetParent(_canvas.transform, false);
+
+            var rt = _legendRoot.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.05f, 0.06f);
+            rt.anchorMax = new Vector2(0.95f, 0.14f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // Layout: evenly space 4 piece entries across the width
+            for (int i = 0; i < 4; i++)
+            {
+                if (!CommandMapping.TryGetCommand(i, out var cmd)) continue;
+
+                float xMin = i / 4f;
+                float xMax = (i + 1) / 4f;
+
+                // Container for this entry
+                var entryGo = new GameObject($"Legend_{i}");
+                entryGo.transform.SetParent(_legendRoot.transform, false);
+                var ert = entryGo.AddComponent<RectTransform>();
+                ert.anchorMin = new Vector2(xMin, 0f);
+                ert.anchorMax = new Vector2(xMax, 1f);
+                ert.offsetMin = Vector2.zero;
+                ert.offsetMax = Vector2.zero;
+
+                // Piece icon (left side of entry)
+                var iconGo = new GameObject($"Icon_{i}");
+                iconGo.transform.SetParent(entryGo.transform, false);
+                var rawImg = iconGo.AddComponent<RawImage>();
+                rawImg.raycastTarget = false;
+
+                var tex = Resources.Load<Texture2D>($"PieceIcons/{PieceIconNames[i]}");
+                if (tex != null)
+                    rawImg.texture = tex;
+
+                var irt = rawImg.rectTransform;
+                irt.anchorMin = new Vector2(0.1f, 0.05f);
+                irt.anchorMax = new Vector2(0.35f, 0.95f);
+                irt.offsetMin = Vector2.zero;
+                irt.offsetMax = Vector2.zero;
+
+                // Command label (right side of entry)
+                var labelGo = new GameObject($"LegendLabel_{i}");
+                labelGo.transform.SetParent(entryGo.transform, false);
+                var label = labelGo.AddComponent<Text>();
+                label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                label.fontSize = 22;
+                label.color = new Color(1f, 1f, 1f, 0.85f);
+                label.alignment = TextAnchor.MiddleLeft;
+                label.raycastTarget = false;
+                label.text = $"{PieceColorNames[i]}\n= {CommandMapping.GetCommandName(cmd)}";
+
+                var shadow = labelGo.AddComponent<Shadow>();
+                shadow.effectColor = Color.black;
+
+                var lrt = label.rectTransform;
+                lrt.anchorMin = new Vector2(0.38f, 0f);
+                lrt.anchorMax = new Vector2(1f, 1f);
+                lrt.offsetMin = Vector2.zero;
+                lrt.offsetMax = Vector2.zero;
+            }
+        }
+
         private void Update()
         {
             if (_slotManager == null || _slotLabels == null) return;
@@ -147,6 +219,8 @@ namespace BoardOfEducation.UI
                     if (img != null) Destroy(img.gameObject);
             if (_instructionText != null)
                 Destroy(_instructionText.gameObject);
+            if (_legendRoot != null)
+                Destroy(_legendRoot);
         }
     }
 }

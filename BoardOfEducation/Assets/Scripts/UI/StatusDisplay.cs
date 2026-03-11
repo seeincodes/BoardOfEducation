@@ -10,6 +10,7 @@ namespace BoardOfEducation.UI
     {
         private Text _levelText;
         private Text _statusText;
+        private Text _pieceInfoText;
 
         public void Initialize(Canvas canvas)
         {
@@ -52,6 +53,25 @@ namespace BoardOfEducation.UI
             srt.anchorMax = new Vector2(0.9f, 0.93f);
             srt.offsetMin = Vector2.zero;
             srt.offsetMax = Vector2.zero;
+
+            // Piece info (below status)
+            var pieceInfoGo = new GameObject("PieceInfo");
+            pieceInfoGo.transform.SetParent(canvas.transform, false);
+            _pieceInfoText = pieceInfoGo.AddComponent<Text>();
+            _pieceInfoText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            _pieceInfoText.fontSize = 24;
+            _pieceInfoText.color = new Color(0.8f, 0.9f, 1f);
+            _pieceInfoText.alignment = TextAnchor.UpperCenter;
+            _pieceInfoText.raycastTarget = false;
+
+            var shadow3 = pieceInfoGo.AddComponent<Shadow>();
+            shadow3.effectColor = Color.black;
+
+            var prt = _pieceInfoText.rectTransform;
+            prt.anchorMin = new Vector2(0.1f, 0.78f);
+            prt.anchorMax = new Vector2(0.9f, 0.87f);
+            prt.offsetMin = Vector2.zero;
+            prt.offsetMax = Vector2.zero;
         }
 
         public void SetLevelName(string name)
@@ -73,6 +93,12 @@ namespace BoardOfEducation.UI
                 _statusText.text = message;
                 _statusText.color = color;
             }
+        }
+
+        public void SetPieceInfo(string info)
+        {
+            if (_pieceInfoText != null)
+                _pieceInfoText.text = info;
         }
     }
 }
