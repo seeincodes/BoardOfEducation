@@ -19,10 +19,11 @@ namespace BoardOfEducation.Game
         public int RequiredPieces { get; }
         public string LevelName { get; }
         public string Instruction { get; }
+        public int[] RelevantGlyphs { get; } // glyph IDs shown in legend
 
         public GridData(string levelName, int rows, int cols, CellType[,] cells,
                         Vector2Int startPos, Direction startDir, Vector2Int goalPos,
-                        int requiredPieces, string instruction = "")
+                        int requiredPieces, string instruction = "", int[] relevantGlyphs = null)
         {
             LevelName = levelName;
             Rows = rows;
@@ -33,6 +34,7 @@ namespace BoardOfEducation.Game
             GoalPos = goalPos;
             RequiredPieces = requiredPieces;
             Instruction = instruction;
+            RelevantGlyphs = relevantGlyphs ?? new[] { 0, 1, 2, 3 };
         }
 
         public bool InBounds(Vector2Int pos)

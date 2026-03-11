@@ -154,9 +154,9 @@ Arcade pieces to program a robot's path through grid levels.
 
 ### F4.3 — Add command legend to slot area
 
-- [ ] Small text below slot display showing piece color → command mapping
-- [ ] E.g. "Yellow=Forward | Purple=Turn Left | Orange=Turn Right | Pink=Jump"
-- [ ] Only show commands relevant to current level (Level 1 only shows Forward)
+- [x] Small text below slot display showing piece color → command mapping
+- [x] E.g. "Yellow=Forward | Purple=Turn Left | Orange=Turn Right | Pink=Jump"
+- [x] Only show commands relevant to current level (Level 1 only shows Forward)
 - **Files:** `Assets/Scripts/UI/SlotDisplay.cs`, `Assets/Scripts/Game/RoadBuilderLevels.cs`
 - **Test:** Level 1 shows "Yellow = Forward". Level 4 also shows "Pink = Jump".
 

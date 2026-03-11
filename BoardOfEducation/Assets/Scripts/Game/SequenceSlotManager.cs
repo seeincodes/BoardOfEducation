@@ -18,6 +18,7 @@ namespace BoardOfEducation.Game
         private PieceTracker _pieceTracker;
         private int _slotCount;
         private int[] _slotGlyphIds; // -1 = empty, -2 = unknown piece
+        private HashSet<int> _allowedGlyphIds; // null means allow all command glyphs
         private bool _wasFilled;
         private float _nextDebugLog;
         private int _excessPieceCount; // pieces beyond slot count
@@ -32,11 +33,14 @@ namespace BoardOfEducation.Game
         public Rect[] SlotRects => _slotRects;
         public int ExcessPieceCount => _excessPieceCount;
 
-        public void Initialize(PieceTracker pieceTracker, int slotCount)
+        public void Initialize(PieceTracker pieceTracker, int slotCount, int[] allowedGlyphIds = null)
         {
             _pieceTracker = pieceTracker;
             _slotCount = slotCount;
             _slotGlyphIds = new int[slotCount];
+            _allowedGlyphIds = (allowedGlyphIds != null && allowedGlyphIds.Length > 0)
+                ? new HashSet<int>(allowedGlyphIds)
+                : null;
             _wasFilled = false;
 
             BuildSlotRects();
@@ -91,7 +95,9 @@ namespace BoardOfEducation.Game
             {
                 if (i < allPieces.Count)
                 {
-                    bool valid = CommandMapping.TryGetCommand(allPieces[i].GlyphId, out _);
+                    bool validCommand = CommandMapping.TryGetCommand(allPieces[i].GlyphId, out _);
+                    bool allowedForLevel = _allowedGlyphIds == null || _allowedGlyphIds.Contains(allPieces[i].GlyphId);
+                    bool valid = validCommand && allowedForLevel;
                     _slotGlyphIds[i] = valid ? allPieces[i].GlyphId : UnknownGlyph;
                     anyFilled = true;
                     if (!valid) allFilledValid = false;
@@ -107,7 +113,8 @@ namespace BoardOfEducation.Game
             // For event purposes, count only valid command pieces
             var commandPieces = new List<PieceTracker.TrackedPiece>();
             foreach (var p in allPieces)
-                if (CommandMapping.TryGetCommand(p.GlyphId, out _))
+                if (CommandMapping.TryGetCommand(p.GlyphId, out _)
+                    && (_allowedGlyphIds == null || _allowedGlyphIds.Contains(p.GlyphId)))
                     commandPieces.Add(p);
             bool allFilled = allFilledValid && assignCount >= _slotCount;
 

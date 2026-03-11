@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
+using Board.Input;
 using BoardOfEducation.Game;
 using BoardOfEducation.UI;
 using UnityEngine;
@@ -28,7 +30,11 @@ namespace BoardOfEducation.Core
         private GridData _currentGrid;
         private int _currentLevel;
         private GameState _state;
-        private bool _pendingRun; // deferred until overlay dismissed
+        private Vector2Int _runtimePos;
+        private Direction _runtimeDir;
+        private int _commandsUsed;
+        private bool _isExecutingStep;
+        private readonly Queue<RobotCommand> _queuedCommands = new();
 
         public void Initialize(Canvas canvas, PieceTracker pieceTracker,
                                SequenceSlotManager slotManager, GridRenderer gridRenderer,
@@ -43,6 +49,7 @@ namespace BoardOfEducation.Core
 
             _slotManager.OnAllSlotsFilled += OnSlotsFilled;
             _slotManager.OnSlotsCleared += OnSlotsCleared;
+            _pieceTracker.OnPiecePlaced += OnPiecePlaced;
         }
 
         public void LoadLevel(int levelIndex)
@@ -55,13 +62,18 @@ namespace BoardOfEducation.Core
 
             // Load new level
             _currentGrid = RoadBuilderLevels.GetLevel(levelIndex);
+            _runtimePos = _currentGrid.StartPos;
+            _runtimeDir = _currentGrid.StartDir;
+            _commandsUsed = 0;
+            _queuedCommands.Clear();
+            _isExecutingStep = false;
 
             // Re-initialize slot manager for new piece count
-            _slotManager.Initialize(_pieceTracker, _currentGrid.RequiredPieces);
+            _slotManager.Initialize(_pieceTracker, _currentGrid.RequiredPieces, _currentGrid.RelevantGlyphs);
 
             // Build visuals
             _gridRenderer.Initialize(_canvas, _currentGrid);
-            _slotDisplay.Initialize(_canvas, _slotManager);
+            _slotDisplay.Initialize(_canvas, _slotManager, _currentGrid.RelevantGlyphs);
 
             // Update status
             _statusDisplay.SetLevelName($"Level {levelIndex + 1}: {_currentGrid.LevelName}");
@@ -86,26 +98,6 @@ namespace BoardOfEducation.Core
         private void Update()
         {
             if (_pieceTracker == null || _statusDisplay == null) return;
-
-            // Dismiss overlay when first piece is placed
-            if (_howToPlayOverlay != null && _howToPlayOverlay.IsVisible
-                && Time.realtimeSinceStartup >= _overlayVisibleUntilRealtime
-                && _pieceTracker.ActivePieces.Count > 0)
-            {
-                _howToPlayOverlay.Dismiss();
-                Debug.Log("[GameController] Overlay dismissed");
-            }
-
-            // Run deferred sequence after overlay is gone
-            if (_pendingRun && (_howToPlayOverlay == null || !_howToPlayOverlay.IsVisible))
-            {
-                _pendingRun = false;
-                if (_state == GameState.ShowingLevel && _slotManager.AllSlotsFilled)
-                {
-                    Debug.Log("[GameController] Running deferred sequence");
-                    StartCoroutine(RunSequence());
-                }
-            }
 
             var pieces = _pieceTracker.ActivePieces;
             var sb = new StringBuilder();
@@ -147,18 +139,33 @@ namespace BoardOfEducation.Core
 
         private void OnSlotsFilled()
         {
-            Debug.Log($"[GameController] OnSlotsFilled — state={_state}, overlay={_howToPlayOverlay?.IsVisible}");
-            if (_state != GameState.ShowingLevel) return;
+            // Sequence runs are now command-by-command on piece placement.
+        }
 
-            // Defer if overlay is still visible so the user can see the animation
+        private void OnPiecePlaced(PieceTracker.TrackedPiece piece)
+        {
+            if (piece.Phase != BoardContactPhase.Began)
+                return;
+            if (_currentGrid == null)
+                return;
+            if (_state == GameState.Success || _state == GameState.Failure)
+                return;
+            if (!CommandMapping.TryGetCommand(piece.GlyphId, out var cmd))
+                return;
+            if (!IsGlyphAllowedForCurrentLevel(piece.GlyphId))
+                return;
+
             if (_howToPlayOverlay != null && _howToPlayOverlay.IsVisible)
             {
-                _pendingRun = true;
-                Debug.Log("[GameController] Deferring run until overlay dismisses");
-                return;
+                if (Time.realtimeSinceStartup < _overlayVisibleUntilRealtime)
+                    return;
+                _howToPlayOverlay.Dismiss();
+                Debug.Log("[GameController] Overlay dismissed from new piece placement");
             }
 
-            StartCoroutine(RunSequence());
+            _queuedCommands.Enqueue(cmd);
+            if (!_isExecutingStep)
+                StartCoroutine(RunQueuedCommands());
         }
 
         private void OnSlotsCleared()
@@ -222,12 +229,106 @@ namespace BoardOfEducation.Core
             }
         }
 
+        private IEnumerator RunQueuedCommands()
+        {
+            _isExecutingStep = true;
+            while (_queuedCommands.Count > 0)
+            {
+                if (_state == GameState.Success || _state == GameState.Failure)
+                {
+                    _queuedCommands.Clear();
+                    break;
+                }
+
+                var cmd = _queuedCommands.Dequeue();
+                _state = GameState.Running;
+                _statusDisplay.SetStatus($"Running: {CommandMapping.GetCommandName(cmd)}", new Color(0.5f, 0.8f, 1f));
+
+                var from = new StepResult
+                {
+                    Position = _runtimePos,
+                    Facing = _runtimeDir,
+                    Success = true,
+                    ReachedGoal = _runtimePos == _currentGrid.GoalPos
+                };
+
+                var step = SimulateSingleCommand(cmd);
+                yield return StartCoroutine(_gridRenderer.AnimateStep(from, step));
+                _commandsUsed++;
+
+                _runtimePos = step.Position;
+                _runtimeDir = step.Facing;
+
+                if (step.ReachedGoal)
+                {
+                    _state = GameState.Success;
+                    _statusDisplay.SetStatus("You did it!", new Color(0.3f, 1f, 0.4f));
+                    _gridRenderer.HighlightCell(_currentGrid.GoalPos, new Color(0.3f, 1f, 0.4f));
+                    yield return new WaitForSeconds(2f);
+
+                    int next = _currentLevel + 1;
+                    if (next < RoadBuilderLevels.Count)
+                        LoadLevel(next);
+                    else
+                        _statusDisplay.SetStatus("All levels complete!", new Color(1f, 0.85f, 0.2f));
+                    break;
+                }
+
+                if (!step.Success || _commandsUsed >= _currentGrid.RequiredPieces)
+                {
+                    _state = GameState.Failure;
+                    _statusDisplay.SetStatus("Try again! Lift pieces to retry.", new Color(1f, 0.3f, 0.2f));
+                    break;
+                }
+
+                _state = GameState.ShowingLevel;
+                _statusDisplay.SetStatus($"Place {_currentGrid.RequiredPieces - _commandsUsed} more piece(s)!",
+                                          new Color(1f, 1f, 0.7f));
+            }
+
+            _isExecutingStep = false;
+        }
+
+        private StepResult SimulateSingleCommand(RobotCommand cmd)
+        {
+            var simGrid = new GridData(
+                _currentGrid.LevelName,
+                _currentGrid.Rows,
+                _currentGrid.Cols,
+                _currentGrid.Cells,
+                _runtimePos,
+                _runtimeDir,
+                _currentGrid.GoalPos,
+                _currentGrid.RequiredPieces,
+                _currentGrid.Instruction,
+                _currentGrid.RelevantGlyphs);
+
+            var steps = RobotSimulator.Run(simGrid, new[] { cmd });
+            return steps[steps.Count - 1];
+        }
+
+        private bool IsGlyphAllowedForCurrentLevel(int glyphId)
+        {
+            if (_currentGrid?.RelevantGlyphs == null || _currentGrid.RelevantGlyphs.Length == 0)
+                return true;
+            foreach (var allowed in _currentGrid.RelevantGlyphs)
+            {
+                if (glyphId == allowed)
+                    return true;
+            }
+            return false;
+        }
+
         private void OnDestroy()
         {
             if (_slotManager != null)
             {
                 _slotManager.OnAllSlotsFilled -= OnSlotsFilled;
                 _slotManager.OnSlotsCleared -= OnSlotsCleared;
+            }
+            if (_pieceTracker != null)
+            {
+                _pieceTracker.OnPiecePlaced -= OnPiecePlaced;
             }
         }
     }

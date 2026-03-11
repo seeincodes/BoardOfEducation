@@ -25,10 +25,13 @@ namespace BoardOfEducation.UI
         private static readonly string[] PieceIconNames = { "RobotYellow", "RobotPurple", "RobotOrange", "RobotPink" };
         private static readonly string[] PieceColorNames = { "Yellow", "Purple", "Orange", "Pink" };
 
-        public void Initialize(Canvas canvas, SequenceSlotManager slotManager)
+        private int[] _relevantGlyphs;
+
+        public void Initialize(Canvas canvas, SequenceSlotManager slotManager, int[] relevantGlyphs = null)
         {
             _canvas = canvas;
             _slotManager = slotManager;
+            _relevantGlyphs = relevantGlyphs ?? new[] { 0, 1, 2, 3 };
 
             BuildSlotVisuals();
             CreateInstructionText();
@@ -133,13 +136,15 @@ namespace BoardOfEducation.UI
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
 
-            // Layout: evenly space 4 piece entries across the width
-            for (int i = 0; i < 4; i++)
+            // Layout: evenly space relevant piece entries across the width
+            int total = _relevantGlyphs.Length;
+            for (int idx = 0; idx < total; idx++)
             {
+                int i = _relevantGlyphs[idx];
                 if (!CommandMapping.TryGetCommand(i, out var cmd)) continue;
 
-                float xMin = i / 4f;
-                float xMax = (i + 1) / 4f;
+                float xMin = idx / (float)total;
+                float xMax = (idx + 1) / (float)total;
 
                 // Container for this entry
                 var entryGo = new GameObject($"Legend_{i}");
