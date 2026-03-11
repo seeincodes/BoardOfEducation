@@ -35,6 +35,16 @@ namespace BoardOfEducation.Core
         private int _commandsUsed;
         private bool _isExecutingStep;
         private readonly Queue<RobotCommand> _queuedCommands = new();
+        private readonly Dictionary<int, ProcessedContactState> _processedByContact = new();
+        private const float DuplicatePlacementCooldownSeconds = 0.35f;
+        private const float DuplicatePlacementMinDistancePixels = 24f;
+
+        private struct ProcessedContactState
+        {
+            public int GlyphId;
+            public Vector2 ScreenPosition;
+            public float Realtime;
+        }
 
         public void Initialize(Canvas canvas, PieceTracker pieceTracker,
                                SequenceSlotManager slotManager, GridRenderer gridRenderer,
@@ -50,6 +60,7 @@ namespace BoardOfEducation.Core
             _slotManager.OnAllSlotsFilled += OnSlotsFilled;
             _slotManager.OnSlotsCleared += OnSlotsCleared;
             _pieceTracker.OnPiecePlaced += OnPiecePlaced;
+            _pieceTracker.OnPieceLifted += OnPieceLifted;
         }
 
         public void LoadLevel(int levelIndex)
@@ -67,6 +78,16 @@ namespace BoardOfEducation.Core
             _commandsUsed = 0;
             _queuedCommands.Clear();
             _isExecutingStep = false;
+            _processedByContact.Clear();
+            foreach (var kvp in _pieceTracker.ActivePieces)
+            {
+                _processedByContact[kvp.Key] = new ProcessedContactState
+                {
+                    GlyphId = kvp.Value.GlyphId,
+                    ScreenPosition = kvp.Value.ScreenPosition,
+                    Realtime = Time.realtimeSinceStartup
+                };
+            }
 
             // Re-initialize slot manager for new piece count
             _slotManager.Initialize(_pieceTracker, _currentGrid.RequiredPieces, _currentGrid.RelevantGlyphs);
@@ -78,8 +99,7 @@ namespace BoardOfEducation.Core
             // Update status
             _statusDisplay.SetLevelName($"Level {levelIndex + 1}: {_currentGrid.LevelName}");
             _statusDisplay.SetInstruction(_currentGrid.Instruction);
-            _statusDisplay.SetStatus($"Place {_currentGrid.RequiredPieces} robot piece{(_currentGrid.RequiredPieces > 1 ? "s" : "")}!",
-                                      new Color(1, 1, 0.7f));
+            _statusDisplay.SetStatus(GetInitialPlacementPrompt(), new Color(1, 1, 0.7f));
 
             _state = GameState.ShowingLevel;
 
@@ -144,8 +164,6 @@ namespace BoardOfEducation.Core
 
         private void OnPiecePlaced(PieceTracker.TrackedPiece piece)
         {
-            if (piece.Phase != BoardContactPhase.Began)
-                return;
             if (_currentGrid == null)
                 return;
             if (_state == GameState.Success || _state == GameState.Failure)
@@ -163,9 +181,31 @@ namespace BoardOfEducation.Core
                 Debug.Log("[GameController] Overlay dismissed from new piece placement");
             }
 
+            // Deduplicate repeated board updates for the same contact/glyph, but
+            // still allow first-seen contacts even if they come as Stationary/Moved.
+            if (_processedByContact.TryGetValue(piece.ContactId, out var prev)
+                && prev.GlyphId == piece.GlyphId)
+            {
+                float dt = Time.realtimeSinceStartup - prev.Realtime;
+                float moved = Vector2.Distance(piece.ScreenPosition, prev.ScreenPosition);
+                if (dt < DuplicatePlacementCooldownSeconds && moved < DuplicatePlacementMinDistancePixels)
+                    return;
+            }
+            _processedByContact[piece.ContactId] = new ProcessedContactState
+            {
+                GlyphId = piece.GlyphId,
+                ScreenPosition = piece.ScreenPosition,
+                Realtime = Time.realtimeSinceStartup
+            };
+
             _queuedCommands.Enqueue(cmd);
             if (!_isExecutingStep)
                 StartCoroutine(RunQueuedCommands());
+        }
+
+        private void OnPieceLifted(PieceTracker.TrackedPiece piece)
+        {
+            _processedByContact.Remove(piece.ContactId);
         }
 
         private void OnSlotsCleared()
@@ -175,8 +215,13 @@ namespace BoardOfEducation.Core
                 // Reset robot to start and allow retry
                 _gridRenderer.ResetCellColors();
                 _gridRenderer.MoveRobotImmediate(_currentGrid.StartPos, _currentGrid.StartDir);
-                _statusDisplay.SetStatus($"Place {_currentGrid.RequiredPieces} robot piece{(_currentGrid.RequiredPieces > 1 ? "s" : "")}!",
-                                          new Color(1, 1, 0.7f));
+                _runtimePos = _currentGrid.StartPos;
+                _runtimeDir = _currentGrid.StartDir;
+                _commandsUsed = 0;
+                _queuedCommands.Clear();
+                _isExecutingStep = false;
+                _processedByContact.Clear();
+                _statusDisplay.SetStatus(GetInitialPlacementPrompt(), new Color(1, 1, 0.7f));
                 _state = GameState.ShowingLevel;
             }
         }
@@ -282,8 +327,8 @@ namespace BoardOfEducation.Core
                 }
 
                 _state = GameState.ShowingLevel;
-                _statusDisplay.SetStatus($"Place {_currentGrid.RequiredPieces - _commandsUsed} more piece(s)!",
-                                          new Color(1f, 1f, 0.7f));
+                _statusDisplay.SetStatus(GetRemainingPlacementPrompt(_currentGrid.RequiredPieces - _commandsUsed),
+                                         new Color(1f, 1f, 0.7f));
             }
 
             _isExecutingStep = false;
@@ -319,6 +364,20 @@ namespace BoardOfEducation.Core
             return false;
         }
 
+        private string GetInitialPlacementPrompt()
+        {
+            if (_currentLevel == 0)
+                return $"Level 1: place {_currentGrid.RequiredPieces} yellow Forward pieces.";
+            return $"Place {_currentGrid.RequiredPieces} robot piece{(_currentGrid.RequiredPieces > 1 ? "s" : "")}!";
+        }
+
+        private string GetRemainingPlacementPrompt(int remaining)
+        {
+            if (_currentLevel == 0)
+                return $"Place {remaining} more yellow Forward piece{(remaining > 1 ? "s" : "")}.";
+            return $"Place {remaining} more piece(s)!";
+        }
+
         private void OnDestroy()
         {
             if (_slotManager != null)
@@ -329,6 +388,7 @@ namespace BoardOfEducation.Core
             if (_pieceTracker != null)
             {
                 _pieceTracker.OnPiecePlaced -= OnPiecePlaced;
+                _pieceTracker.OnPieceLifted -= OnPieceLifted;
             }
         }
     }

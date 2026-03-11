@@ -23,16 +23,17 @@ namespace BoardOfEducation.Game
             }
         }
 
-        // Level 1: Straight line — 1 Forward
-        // [S] [G]
+        // Level 1: Straight line — 2 Forward
+        // [S] [ ] [G]
         private static GridData Level1()
         {
-            var cells = new CellType[1, 2];
+            var cells = new CellType[1, 3];
             cells[0, 0] = CellType.Start;
-            cells[0, 1] = CellType.Goal;
-            return new GridData("Go Forward!", 1, 2, cells,
-                new Vector2Int(0, 0), Direction.Right, new Vector2Int(1, 0), 1,
-                "Place 1 Forward piece to move the robot to the goal!",
+            cells[0, 1] = CellType.Empty;
+            cells[0, 2] = CellType.Goal;
+            return new GridData("Go Forward!", 1, 3, cells,
+                new Vector2Int(0, 0), Direction.Right, new Vector2Int(2, 0), 2,
+                "Place 2 Forward pieces to reach the goal.",
                 new[] { 0 }); // Yellow=Forward only
         }
 

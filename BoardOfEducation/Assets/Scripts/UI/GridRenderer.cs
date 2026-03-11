@@ -161,6 +161,12 @@ namespace BoardOfEducation.UI
             Vector2 endPos = GridToCanvas(to.Position);
             float startAngle = DirectionToAngle(from.Facing);
             float endAngle = DirectionToAngle(to.Facing);
+            bool turnedOnly = from.Position == to.Position && from.Facing != to.Facing;
+            bool moved = from.Position != to.Position;
+            if (turnedOnly)
+                duration = 0.22f;
+            else if (moved)
+                duration = 0.32f;
 
             // Handle angle wrapping
             float angleDiff = Mathf.DeltaAngle(startAngle, endAngle);
