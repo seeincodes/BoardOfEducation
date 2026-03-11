@@ -145,10 +145,10 @@ Arcade pieces to program a robot's path through grid levels.
 
 ### F4.2 — Add "How to Play" intro overlay on first launch
 
-- [ ] Full-screen semi-transparent overlay shown before Level 1 starts
-- [ ] Explains: "Place robot pieces on the board to program the robot's path"
-- [ ] Shows piece-to-command legend (which piece = which command)
-- [ ] Dismisses when first piece is placed on board
+- [x] Full-screen semi-transparent overlay shown before Level 1 starts
+- [x] Explains: "Place robot pieces on the board to program the robot's path"
+- [x] Shows piece-to-command legend (which piece = which command)
+- [x] Dismisses when first piece is placed on board
 - **Files:** `Assets/Scripts/UI/HowToPlayOverlay.cs` (new), `Assets/Scripts/Core/RoadBuilderGameController.cs`
 - **Test:** Game starts → overlay visible → place piece → overlay dismisses → Level 1 begins
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using Board.Input;
 using Board.Input.Simulation;
@@ -8,6 +9,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
+#if UNITY_EDITOR
 namespace BoardOfEducation.DebugTools
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace BoardOfEducation.DebugTools
             if (!injectOnStart)
                 yield break;
 
-            yield return new WaitForSeconds(injectDelaySeconds);
+            yield return new WaitForSecondsRealtime(injectDelaySeconds);
             InjectForward();
         }
 
@@ -57,7 +59,13 @@ namespace BoardOfEducation.DebugTools
                 _injectedContact = CreateAndPlaceContact(simulation, icon, screenPosition);
 
                 if (_injectedContact != null)
+                {
                     UnityEngine.Debug.Log($"[MCP Injector] Injected Forward piece (glyph={icon.glyphId}) at {screenPosition}.");
+                }
+                else
+                {
+                    UnityEngine.Debug.LogError("[MCP Injector] Injection failed: could not create simulation contact.");
+                }
             }
             catch (Exception ex)
             {
@@ -80,9 +88,13 @@ namespace BoardOfEducation.DebugTools
 
         private static Component CreateAndPlaceContact(BoardContactSimulation simulation, BoardContactSimulationIcon icon, Vector2 position)
         {
-            var contactType = simulation.GetType().Assembly.GetType("Board.Input.Simulation.BoardSimulationContact");
+            var contactType = ResolveContactType(simulation);
             if (contactType == null)
+            {
+                var candidates = string.Join(", ", GetCandidateContactTypes(simulation));
+                UnityEngine.Debug.LogError($"[MCP Injector] Could not resolve simulation contact type. Candidates: {candidates}");
                 return null;
+            }
 
             var go = new GameObject("McpInjectedForwardContact");
             go.transform.SetParent(simulation.transform, false);
@@ -98,6 +110,46 @@ namespace BoardOfEducation.DebugTools
             placeMethod?.Invoke(contact, new object[] { false });
 
             return contact;
+        }
+
+        private static Type ResolveContactType(BoardContactSimulation simulation)
+        {
+            var assembly = simulation.GetType().Assembly;
+            var exact = assembly.GetType("Board.Input.Simulation.BoardSimulationContact");
+            if (exact != null)
+                return exact;
+
+            foreach (var type in assembly.GetTypes())
+            {
+                if (!typeof(Component).IsAssignableFrom(type))
+                    continue;
+                if (!string.Equals(type.Namespace, "Board.Input.Simulation", StringComparison.Ordinal))
+                    continue;
+
+                var iconProperty = type.GetProperty("icon", BindingFlags.Public | BindingFlags.Instance);
+                var hasMoveTo = type.GetMethod("MoveTo", BindingFlags.Public | BindingFlags.Instance) != null;
+                var hasPlace = type.GetMethod("Place", BindingFlags.Public | BindingFlags.Instance) != null;
+
+                if (iconProperty != null && hasMoveTo && hasPlace)
+                    return type;
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<string> GetCandidateContactTypes(BoardContactSimulation simulation)
+        {
+            var assembly = simulation.GetType().Assembly;
+            foreach (var type in assembly.GetTypes())
+            {
+                if (!typeof(Component).IsAssignableFrom(type))
+                    continue;
+                if (!string.Equals(type.Namespace, "Board.Input.Simulation", StringComparison.Ordinal))
+                    continue;
+                if (type.Name.IndexOf("Contact", StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+                yield return type.FullName;
+            }
         }
 
         private BoardContactSimulationIcon LoadForwardIcon()
@@ -127,3 +179,4 @@ namespace BoardOfEducation.DebugTools
         }
     }
 }
+#endif

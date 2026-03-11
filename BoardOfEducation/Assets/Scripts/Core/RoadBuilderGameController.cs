@@ -21,9 +21,14 @@ namespace BoardOfEducation.Core
         private Canvas _canvas;
         private PieceTracker _pieceTracker;
 
+        private HowToPlayOverlay _howToPlayOverlay;
+        private float _overlayVisibleUntilRealtime;
+        private const float MinOverlayVisibleSeconds = 1.5f;
+
         private GridData _currentGrid;
         private int _currentLevel;
         private GameState _state;
+        private bool _pendingRun; // deferred until overlay dismissed
 
         public void Initialize(Canvas canvas, PieceTracker pieceTracker,
                                SequenceSlotManager slotManager, GridRenderer gridRenderer,
@@ -65,12 +70,42 @@ namespace BoardOfEducation.Core
                                       new Color(1, 1, 0.7f));
 
             _state = GameState.ShowingLevel;
+
+            // Show "How to Play" overlay on first level
+            if (levelIndex == 0 && _howToPlayOverlay == null)
+            {
+                var overlayGo = new GameObject("HowToPlayOverlay");
+                _howToPlayOverlay = overlayGo.AddComponent<HowToPlayOverlay>();
+                _howToPlayOverlay.Initialize(_canvas);
+                _overlayVisibleUntilRealtime = Time.realtimeSinceStartup + MinOverlayVisibleSeconds;
+            }
+
             Debug.Log($"[RoadBuilder] Loaded level {levelIndex + 1}: {_currentGrid.LevelName} ({_currentGrid.RequiredPieces} pieces)");
         }
 
         private void Update()
         {
             if (_pieceTracker == null || _statusDisplay == null) return;
+
+            // Dismiss overlay when first piece is placed
+            if (_howToPlayOverlay != null && _howToPlayOverlay.IsVisible
+                && Time.realtimeSinceStartup >= _overlayVisibleUntilRealtime
+                && _pieceTracker.ActivePieces.Count > 0)
+            {
+                _howToPlayOverlay.Dismiss();
+                Debug.Log("[GameController] Overlay dismissed");
+            }
+
+            // Run deferred sequence after overlay is gone
+            if (_pendingRun && (_howToPlayOverlay == null || !_howToPlayOverlay.IsVisible))
+            {
+                _pendingRun = false;
+                if (_state == GameState.ShowingLevel && _slotManager.AllSlotsFilled)
+                {
+                    Debug.Log("[GameController] Running deferred sequence");
+                    StartCoroutine(RunSequence());
+                }
+            }
 
             var pieces = _pieceTracker.ActivePieces;
             var sb = new StringBuilder();
@@ -112,8 +147,17 @@ namespace BoardOfEducation.Core
 
         private void OnSlotsFilled()
         {
-            Debug.Log($"[GameController] OnSlotsFilled — state={_state}");
+            Debug.Log($"[GameController] OnSlotsFilled — state={_state}, overlay={_howToPlayOverlay?.IsVisible}");
             if (_state != GameState.ShowingLevel) return;
+
+            // Defer if overlay is still visible so the user can see the animation
+            if (_howToPlayOverlay != null && _howToPlayOverlay.IsVisible)
+            {
+                _pendingRun = true;
+                Debug.Log("[GameController] Deferring run until overlay dismisses");
+                return;
+            }
+
             StartCoroutine(RunSequence());
         }
 
