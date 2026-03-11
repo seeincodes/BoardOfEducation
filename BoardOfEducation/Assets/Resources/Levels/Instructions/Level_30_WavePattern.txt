@@ -1,0 +1,7 @@
+Watch the waves! They make a pattern.
+
+The wave goes: Rise, Crash. Then it repeats!
+Place the pieces to show the pattern happening 2 times:
+  Rise, Crash, Rise, Crash.
+
+This is called a loop — the same thing happens over and over.

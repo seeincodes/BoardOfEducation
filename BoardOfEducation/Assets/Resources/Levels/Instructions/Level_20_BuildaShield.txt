@@ -1,0 +1,8 @@
+Let's build a shield! This time you need to group the steps.
+
+There are two groups:
+  Group 1: Cut Wood, Shape It
+  Group 2: Add Handle, Paint It
+
+Place the pieces so each group is together.
+First do Group 1, then do Group 2 — order matters inside each group too!

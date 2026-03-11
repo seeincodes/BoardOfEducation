@@ -13,6 +13,9 @@ namespace BoardOfEducation.Core
     /// </summary>
     public class SortingGameBootstrap : MonoBehaviour
     {
+        [Tooltip("Level name to load from Resources/Levels/ (e.g. Level_00_FirstSteps)")]
+        [SerializeField] private string levelName = "Level_00_FirstSteps";
+
         private void Awake()
         {
             // 1. EventSystem (if not present)
@@ -84,6 +87,41 @@ namespace BoardOfEducation.Core
                 cam.clearFlags = CameraClearFlags.SolidColor;
                 cam.backgroundColor = new Color(0.1f, 0.1f, 0.15f, 1f);
                 cam.orthographic = true;
+            }
+
+            // 10. How-to-play instructions — loaded from Resources, no drag-and-drop needed
+            var currentLevel = Resources.Load<LevelConfig>($"Levels/{levelName}");
+            if (currentLevel != null)
+            {
+                var instructions = currentLevel.GetHowToPlayInstructions();
+                if (!string.IsNullOrEmpty(instructions))
+                {
+                    var instrGo = new GameObject("Instructions");
+                    instrGo.transform.SetParent(canvasGo.transform, false);
+
+                    var txt = instrGo.AddComponent<Text>();
+                    txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                    txt.fontSize = 32;
+                    txt.color = Color.white;
+                    txt.alignment = TextAnchor.UpperCenter;
+                    txt.text = instructions;
+                    txt.raycastTarget = false;
+
+                    var shadow = instrGo.AddComponent<Shadow>();
+                    shadow.effectColor = Color.black;
+
+                    var rt = txt.rectTransform;
+                    rt.anchorMin = new Vector2(0.1f, 0.7f);
+                    rt.anchorMax = new Vector2(0.9f, 0.95f);
+                    rt.offsetMin = Vector2.zero;
+                    rt.offsetMax = Vector2.zero;
+
+                    Debug.Log($"[Bootstrap] Showing instructions for: {currentLevel.levelName}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[Bootstrap] Could not load level: Levels/{levelName}");
             }
 
             Debug.Log("[Bootstrap] SortingGame scene ready. Place pieces on the Board to test.");

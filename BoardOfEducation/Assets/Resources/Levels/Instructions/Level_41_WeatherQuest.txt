@@ -1,0 +1,8 @@
+Check the weather before you go outside!
+
+This puzzle uses an IF/THEN choice:
+  IF it's raining THEN: Take Umbrella, Splash Puddles.
+  ELSE: Wear Sunhat, Pick Flowers.
+
+Place the rainy-day pieces on one side and the sunny-day pieces on the other.
+Both paths need to be in the right order!

@@ -1,0 +1,8 @@
+Welcome to your first puzzle!
+
+You have 4 numbered pieces: 1, 2, 3, and 4.
+Place them on the board in order from smallest to biggest.
+
+Put piece 1 in the first slot, piece 2 in the second slot, and so on.
+
+When all 4 pieces are in the right spots, you win!

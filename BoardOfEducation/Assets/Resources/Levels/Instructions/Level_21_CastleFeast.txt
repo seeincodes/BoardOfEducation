@@ -1,0 +1,8 @@
+The king is having a feast! Help get everything ready.
+
+Group the steps into two parts:
+  First: Set Table, Light Candles
+  Then: Serve Food, Pour Drinks
+
+Each group has to be done in order.
+You can't serve food before the table is set!

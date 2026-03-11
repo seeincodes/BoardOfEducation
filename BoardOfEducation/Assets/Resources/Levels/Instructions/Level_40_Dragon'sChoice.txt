@@ -1,0 +1,9 @@
+You found a dragon! But is it friendly?
+
+This puzzle uses an IF/THEN choice:
+  IF the dragon is friendly THEN: Give Gift, Make Friend.
+  ELSE: Raise Shield, Back Away.
+
+Place the pieces for BOTH paths.
+The friendly path goes on one side, the not-friendly path on the other.
+Talk about it — what would YOU do if you met a dragon?

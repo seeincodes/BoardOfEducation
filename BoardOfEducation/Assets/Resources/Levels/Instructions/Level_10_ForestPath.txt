@@ -1,0 +1,7 @@
+You are going on a forest adventure!
+
+Put the steps in the right order to cross the forest safely:
+  Enter, Follow Trail, Cross Bridge, Exit.
+
+Think about it — you have to enter before you can follow the trail!
+Work together to figure out the right path.

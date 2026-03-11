@@ -1,0 +1,9 @@
+Dive for treasure!
+
+Each dive has 3 steps: Dive, Grab Gem, Surface.
+You need to do it 2 times to get all the gems!
+
+Place the pieces to show the loop:
+  Dive, Grab Gem, Surface, Dive, Grab Gem, Surface.
+
+Work with your partner — that's a lot of pieces to place!
