@@ -5,9 +5,6 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/Game.unity
-    guid: f5b8e181cfb664342a1ac9f6ae478aca
   - enabled: 1
     path: Assets/Scenes/SortingGame.unity
     guid: 9250893d2a79641ceabd255e2d26c4c0
