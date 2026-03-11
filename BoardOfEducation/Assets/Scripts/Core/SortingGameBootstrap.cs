@@ -1,3 +1,4 @@
+using BoardOfEducation.Game;
 using BoardOfEducation.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -61,11 +62,20 @@ namespace BoardOfEducation.Core
 
             // 6. Debug Overlay
             var debugGo = new GameObject("DebugOverlay");
-            var debugOverlay = debugGo.AddComponent<DebugOverlay>();
-            // DebugOverlay will find PieceTracker via FindObjectOfType
+            debugGo.AddComponent<DebugOverlay>();
             Debug.Log("[Bootstrap] Created DebugOverlay");
 
-            // 7. Camera (if missing)
+            // 7. Zone Manager
+            var zoneGo = new GameObject("ZoneManager");
+            zoneGo.AddComponent<ZoneManager>();
+            Debug.Log("[Bootstrap] Created ZoneManager");
+
+            // 8. Zone Display
+            var zoneDisplayGo = new GameObject("ZoneDisplay");
+            var zoneDisplay = zoneDisplayGo.AddComponent<ZoneDisplay>();
+            Debug.Log("[Bootstrap] Created ZoneDisplay");
+
+            // 9. Camera (if missing)
             if (Camera.main == null)
             {
                 var camGo = new GameObject("Main Camera");
