@@ -123,21 +123,26 @@ namespace BoardOfEducation.Editor
 
         private static void EnsureSceneBootstrapped()
         {
-            // Check if GameManager exists in the scene - if not, scene needs bootstrapping
-            var gameScene = EditorSceneManager.OpenScene("Assets/Scenes/Game.unity", OpenSceneMode.Single);
-            var hasGameManager = false;
+            // Check if SortingGameBootstrap exists in the scene
+            var scenePath = "Assets/Scenes/SortingGame.unity";
+            if (!File.Exists(scenePath))
+                scenePath = "Assets/Scenes/Game.unity";
+            var gameScene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            var hasBootstrap = false;
             foreach (var go in gameScene.GetRootGameObjects())
             {
-                if (go.GetComponent<GameManager>() != null)
+                if (go.GetComponent<BoardOfEducation.Core.SortingGameBootstrap>() != null)
                 {
-                    hasGameManager = true;
+                    hasBootstrap = true;
                     break;
                 }
             }
-            if (!hasGameManager)
+            if (!hasBootstrap)
             {
-                Debug.Log("[BoardBuild] Scene is empty — running SceneBootstrapper...");
-                SceneBootstrapper.Bootstrap();
+                Debug.Log("[BoardBuild] Scene missing SortingGameBootstrap — adding it...");
+                var bootstrapGo = new UnityEngine.GameObject("Bootstrap");
+                bootstrapGo.AddComponent<BoardOfEducation.Core.SortingGameBootstrap>();
+                EditorSceneManager.SaveScene(gameScene);
             }
         }
 
