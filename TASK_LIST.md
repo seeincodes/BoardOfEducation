@@ -136,10 +136,10 @@ Arcade pieces to program a robot's path through grid levels.
 
 ### F4.1 — Add level-specific instruction text below level name
 
-- [ ] Each level gets a clear instruction string explaining what to do
-- [ ] Level 1: "Place 1 Forward piece to move the robot to the goal!"
-- [ ] Level 2: "Use Forward and Turn Right to navigate the L-shape!"
-- [ ] Show instruction between level name and status message
+- [x] Each level gets a clear instruction string explaining what to do
+- [x] Level 1: "Place 1 Forward piece to move the robot to the goal!"
+- [x] Level 2: "Use Forward and Turn Right to navigate the L-shape!"
+- [x] Show instruction between level name and status message
 - **Files:** `Assets/Scripts/Game/RoadBuilderLevels.cs`, `Assets/Scripts/UI/StatusDisplay.cs`, `Assets/Scripts/Core/RoadBuilderGameController.cs`
 - **Test:** Each level displays a unique, readable instruction on screen
 

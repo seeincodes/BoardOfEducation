@@ -60,6 +60,7 @@ namespace BoardOfEducation.Core
 
             // Update status
             _statusDisplay.SetLevelName($"Level {levelIndex + 1}: {_currentGrid.LevelName}");
+            _statusDisplay.SetInstruction(_currentGrid.Instruction);
             _statusDisplay.SetStatus($"Place {_currentGrid.RequiredPieces} robot piece{(_currentGrid.RequiredPieces > 1 ? "s" : "")}!",
                                       new Color(1, 1, 0.7f));
 

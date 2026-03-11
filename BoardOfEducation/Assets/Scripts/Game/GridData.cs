@@ -18,10 +18,11 @@ namespace BoardOfEducation.Game
         public Vector2Int GoalPos { get; }
         public int RequiredPieces { get; }
         public string LevelName { get; }
+        public string Instruction { get; }
 
         public GridData(string levelName, int rows, int cols, CellType[,] cells,
                         Vector2Int startPos, Direction startDir, Vector2Int goalPos,
-                        int requiredPieces)
+                        int requiredPieces, string instruction = "")
         {
             LevelName = levelName;
             Rows = rows;
@@ -31,6 +32,7 @@ namespace BoardOfEducation.Game
             StartDir = startDir;
             GoalPos = goalPos;
             RequiredPieces = requiredPieces;
+            Instruction = instruction;
         }
 
         public bool InBounds(Vector2Int pos)

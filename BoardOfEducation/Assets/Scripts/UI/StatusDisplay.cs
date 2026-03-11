@@ -9,6 +9,7 @@ namespace BoardOfEducation.UI
     public class StatusDisplay : MonoBehaviour
     {
         private Text _levelText;
+        private Text _instructionText;
         private Text _statusText;
         private Text _pieceInfoText;
 
@@ -35,6 +36,26 @@ namespace BoardOfEducation.UI
             lrt.offsetMin = Vector2.zero;
             lrt.offsetMax = Vector2.zero;
 
+            // Instruction text (between level name and status)
+            var instructionGo = new GameObject("InstructionText");
+            instructionGo.transform.SetParent(canvas.transform, false);
+            _instructionText = instructionGo.AddComponent<Text>();
+            _instructionText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            _instructionText.fontSize = 28;
+            _instructionText.fontStyle = FontStyle.Italic;
+            _instructionText.color = new Color(0.9f, 0.95f, 1f);
+            _instructionText.alignment = TextAnchor.MiddleCenter;
+            _instructionText.raycastTarget = false;
+
+            var shadow4 = instructionGo.AddComponent<Shadow>();
+            shadow4.effectColor = Color.black;
+
+            var irt = _instructionText.rectTransform;
+            irt.anchorMin = new Vector2(0.05f, 0.87f);
+            irt.anchorMax = new Vector2(0.95f, 0.93f);
+            irt.offsetMin = Vector2.zero;
+            irt.offsetMax = Vector2.zero;
+
             // Status message
             var statusGo = new GameObject("StatusMessage");
             statusGo.transform.SetParent(canvas.transform, false);
@@ -49,8 +70,8 @@ namespace BoardOfEducation.UI
             shadow2.effectColor = Color.black;
 
             var srt = _statusText.rectTransform;
-            srt.anchorMin = new Vector2(0.1f, 0.87f);
-            srt.anchorMax = new Vector2(0.9f, 0.93f);
+            srt.anchorMin = new Vector2(0.1f, 0.81f);
+            srt.anchorMax = new Vector2(0.9f, 0.87f);
             srt.offsetMin = Vector2.zero;
             srt.offsetMax = Vector2.zero;
 
@@ -68,8 +89,8 @@ namespace BoardOfEducation.UI
             shadow3.effectColor = Color.black;
 
             var prt = _pieceInfoText.rectTransform;
-            prt.anchorMin = new Vector2(0.1f, 0.78f);
-            prt.anchorMax = new Vector2(0.9f, 0.87f);
+            prt.anchorMin = new Vector2(0.1f, 0.72f);
+            prt.anchorMax = new Vector2(0.9f, 0.81f);
             prt.offsetMin = Vector2.zero;
             prt.offsetMax = Vector2.zero;
         }
@@ -78,6 +99,12 @@ namespace BoardOfEducation.UI
         {
             if (_levelText != null)
                 _levelText.text = name;
+        }
+
+        public void SetInstruction(string instruction)
+        {
+            if (_instructionText != null)
+                _instructionText.text = instruction;
         }
 
         public void SetStatus(string message)

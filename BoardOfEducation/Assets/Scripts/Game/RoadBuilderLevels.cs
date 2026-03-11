@@ -31,7 +31,8 @@ namespace BoardOfEducation.Game
             cells[0, 0] = CellType.Start;
             cells[0, 1] = CellType.Goal;
             return new GridData("Go Forward!", 1, 2, cells,
-                new Vector2Int(0, 0), Direction.Right, new Vector2Int(1, 0), 1);
+                new Vector2Int(0, 0), Direction.Right, new Vector2Int(1, 0), 1,
+                "Place 1 Forward piece to move the robot to the goal!");
         }
 
         // Level 2: Right turn — Forward + TurnRight + Forward
@@ -45,7 +46,8 @@ namespace BoardOfEducation.Game
             cells[1, 0] = CellType.Blocked;
             cells[1, 1] = CellType.Goal;
             return new GridData("Turn Right!", 2, 2, cells,
-                new Vector2Int(0, 0), Direction.Right, new Vector2Int(1, 1), 3);
+                new Vector2Int(0, 0), Direction.Right, new Vector2Int(1, 1), 3,
+                "Use Forward and Turn Right to navigate the L-shape!");
         }
 
         // Level 3: L-shape path — 3 commands
@@ -61,7 +63,8 @@ namespace BoardOfEducation.Game
             cells[1, 1] = CellType.Blocked;
             cells[1, 2] = CellType.Goal;
             return new GridData("Around the Corner!", 2, 3, cells,
-                new Vector2Int(0, 0), Direction.Right, new Vector2Int(2, 1), 4);
+                new Vector2Int(0, 0), Direction.Right, new Vector2Int(2, 1), 4,
+                "Go forward, turn the corner, and keep going!");
         }
 
         // Level 4: Gap crossing — includes Jump
@@ -74,7 +77,8 @@ namespace BoardOfEducation.Game
             cells[0, 2] = CellType.Gap;
             cells[0, 3] = CellType.Goal;
             return new GridData("Jump the Gap!", 1, 4, cells,
-                new Vector2Int(0, 0), Direction.Right, new Vector2Int(3, 0), 3);
+                new Vector2Int(0, 0), Direction.Right, new Vector2Int(3, 0), 3,
+                "Use Jump to leap over the gap in the road!");
         }
 
         // Level 5: Complex path with turns and jump
@@ -100,7 +104,8 @@ namespace BoardOfEducation.Game
             cells[2, 2] = CellType.Empty;
             cells[2, 3] = CellType.Goal;
             return new GridData("Big Adventure!", 3, 4, cells,
-                new Vector2Int(0, 0), Direction.Right, new Vector2Int(3, 2), 5);
+                new Vector2Int(0, 0), Direction.Right, new Vector2Int(3, 2), 5,
+                "Combine Forward, Turn, and Jump to reach the goal!");
         }
     }
 }
