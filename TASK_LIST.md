@@ -1,190 +1,242 @@
-# Task List: Board of Education — Sorting Logic Game
+# Task List: Board of Education — Robot Road Builder
 
-Fresh rebuild: conditional sorting game with 3 Arcade pieces on Board hardware.
-Players sort pieces into LEFT/RIGHT zones based on IF/THEN rules.
+Robot programming puzzle game for Board.fun hardware. Players place physical
+Arcade pieces to program a robot's path through grid levels.
 
 ---
 
-## F1: Clean Scene & Board SDK Wiring
+## F1: Core Infrastructure (DONE)
 
-### F1.1 — Create minimal game scene with correct Canvas/EventSystem setup
-- [x] New scene with Canvas (ScreenSpaceOverlay, 1920x1080, match 0.5) + EventSystem
-- **Files:** `Assets/Scenes/SortingGame.unity`
-- **Test:** Scene opens in Unity with no errors
+### F1.1 — Scene & Canvas setup
+- [x] Canvas (ScreenSpaceOverlay, 1920x1080) + EventSystem via RoadBuilderBootstrap
+- **Files:** `Assets/Scripts/Core/RoadBuilderBootstrap.cs`
 
-### F1.2 — BoardUIInputModule setup script
-- [x] Script that adds BoardUIInputModule to EventSystem at runtime, disables StandaloneInputModule
+### F1.2 — BoardUIInputModule setup
+- [x] Adds BoardUIInputModule at runtime, disables StandaloneInputModule
 - **Files:** `Assets/Scripts/Core/BoardSetup.cs`
-- **Test:** Play scene → console logs "BoardUIInputModule active" (or equivalent)
 
-### F1.3 — Piece detection polling loop
-- [x] Script that polls `BoardInput.GetActiveContacts(BoardContactType.Glyph)` every frame
+### F1.3 — Piece detection & tracking
+- [x] Polls `BoardInput.GetActiveContacts(BoardContactType.Glyph)` every frame
 - [x] Track piece lifecycle: Began, Moved/Stationary, Ended
-- [x] Store active pieces in a dictionary keyed by contactId
+- [x] Store active pieces in dictionary keyed by contactId
+- [x] Grace period (3 frames) for dropped contacts
 - **Files:** `Assets/Scripts/Core/PieceTracker.cs`
-- **Test:** Place Arcade piece on Board → PieceTracker reports it in console
 
-### F1.4 — Debug overlay showing detected pieces
-- [x] On-screen text showing each detected piece's glyphId, position, orientation, phase
+### F1.4 — Debug overlay
+- [x] On-screen text showing detected piece glyphId, position, orientation, phase
 - **Files:** `Assets/Scripts/UI/DebugOverlay.cs`
-- **Test:** Place/move/lift pieces → overlay updates in real time
 
 ---
 
-## F2: Zone System
+## F2: Grid & Robot System (DONE)
 
-### F2.1 — Define LEFT and RIGHT zone data
-- [x] Simple class holding zone name, screen-space bounds (Rect), and color
-- **Files:** `Assets/Scripts/Game/SortingZone.cs`
-- **Test:** Compiles, can instantiate two zones with different bounds
+### F2.1 — Grid data model
+- [x] GridData with cell types (Empty, Blocked, Start, Goal, Gap)
+- [x] Start/goal positions, direction, required piece count
+- **Files:** `Assets/Scripts/Game/GridData.cs`
 
-### F2.2 — Zone manager maps pieces to zones
-- [x] Consumes PieceTracker's active pieces each frame
-- [x] Determines which zone (if any) each piece is in based on screen position
-- [x] Fires events: OnPieceEnteredZone, OnPieceLeftZone
-- **Files:** `Assets/Scripts/Game/ZoneManager.cs`
-- **Test:** Place piece on left half of Board → ZoneManager reports LEFT zone
+### F2.2 — Robot command mapping
+- [x] Enum: Forward, TurnLeft, TurnRight, Jump
+- [x] Glyph-to-command mapping via CommandMapping.TryGetCommand
+- [x] Direction rotation and offset helpers
+- **Files:** `Assets/Scripts/Game/RobotCommand.cs`
 
-### F2.3 — Zone visual rendering
-- [x] Draw colored rectangles on canvas for LEFT and RIGHT zones
-- [x] Highlight zone when a piece is inside it
-- **Files:** `Assets/Scripts/UI/ZoneDisplay.cs`
-- **Test:** Two colored zones visible on screen, zone lights up when piece enters
+### F2.3 — Robot simulator (pure logic)
+- [x] Executes command sequence on grid, returns step-by-step results
+- [x] Handles Forward, Turn, Jump over gaps, out-of-bounds checks
+- **Files:** `Assets/Scripts/Game/RobotSimulator.cs`
 
----
+### F2.4 — Grid renderer with robot animation
+- [x] Renders grid cells in upper 65% of screen
+- [x] Animates robot movement with smooth interpolation
+- [x] Bounce effect for jumps, red flash on failure
+- **Files:** `Assets/Scripts/UI/GridRenderer.cs`
 
-## F3: Rule Engine
+### F2.5 — Sequence slot manager
+- [x] Detects valid robot pieces anywhere on board
+- [x] Assigns to slots by X position (leftmost = slot 0)
+- [x] Fires OnAllSlotsFilled / OnSlotsCleared events
+- **Files:** `Assets/Scripts/Game/SequenceSlotManager.cs`
 
-### F3.1 — Sorting rule data structure
-- [x] Class holding: rule text, target glyphIds for LEFT zone, target glyphIds for RIGHT zone
-- [x] Support simple IF condition (e.g., "IF piece is ▲ → LEFT, ELSE → RIGHT")
-- **Files:** `Assets/Scripts/Game/SortingRule.cs`
-- **Test:** Can create a rule and query "where should glyphId X go?"
+### F2.6 — Slot display UI
+- [x] Renders slot outlines at bottom of screen
+- [x] Shows command names when pieces detected
+- [x] "Place robot pieces here!" instruction text
+- **Files:** `Assets/Scripts/UI/SlotDisplay.cs`
 
-### F3.2 — Rule set with 3 starter rules
-- [x] A collection of 3 hardcoded rules using real Arcade glyphIds
-- [x] Method to get next rule / random rule
-- **Files:** `Assets/Scripts/Game/RuleSet.cs`
-- **Test:** RuleSet returns 3 distinct rules with valid glyphIds
+### F2.7 — Status display
+- [x] Level name + status message at top of screen
+- [x] Color-coded feedback (yellow=waiting, blue=running, green=success, red=fail)
+- **Files:** `Assets/Scripts/UI/StatusDisplay.cs`
 
-### F3.3 — Rule display UI
-- [x] Show current rule on screen in kid-friendly text (age 6+)
-- [x] Large, readable font with piece icons/names
-- **Files:** `Assets/Scripts/UI/RuleDisplay.cs`
-- **Test:** Rule text visible and readable on Board screen
+### F2.8 — Game controller state machine
+- [x] States: ShowingLevel → Running → Success/Failure
+- [x] Auto-runs on all slots filled, retry on slots cleared after failure
+- [x] Advances to next level on success
+- **Files:** `Assets/Scripts/Core/RoadBuilderGameController.cs`
 
----
-
-## F4: Validation & Feedback
-
-### F4.1 — Sorting validator
-- [ ] Takes current zone→piece mapping from ZoneManager and current SortingRule
-- [ ] Returns: all correct, which pieces are wrong, which are right
-- **Files:** `Assets/Scripts/Game/SortingValidator.cs`
-- **Test:** Given rule + correct placement → returns valid. Wrong placement → returns invalid with specifics.
-
-### F4.2 — Visual feedback (correct/incorrect)
-- [ ] Green flash + particles for correct sort
-- [ ] Red flash + shake for incorrect sort
-- [ ] Per-piece indicators (checkmark/X on each zone)
-- **Files:** `Assets/Scripts/UI/FeedbackDisplay.cs`
-- **Test:** Trigger correct → green animation plays. Trigger incorrect → red animation plays.
-
-### F4.3 — Audio feedback
-- [ ] Correct sound effect on valid sort
-- [ ] Incorrect sound effect on invalid sort
-- **Files:** `Assets/Scripts/UI/FeedbackDisplay.cs` (extend), `Assets/Resources/Audio/correct.wav`, `Assets/Resources/Audio/incorrect.wav`
-- **Test:** Sounds play on validate
+### F2.9 — 5 hardcoded levels
+- [x] Level 1: Go Forward (1 piece), Level 2: Turn Right (3 pieces)
+- [x] Level 3: Around the Corner (4 pieces), Level 4: Jump the Gap (3 pieces)
+- [x] Level 5: Big Adventure (5 pieces)
+- **Files:** `Assets/Scripts/Game/RoadBuilderLevels.cs`
 
 ---
 
-## F5: Game Flow
+## F3: Level 1 Finetune — Piece Tracking & Board Objects
 
-### F5.1 — Game state machine
-- [ ] States: Title → Instructions → Playing → Validating → Result → (next round or end)
-- [ ] Manages transitions between states
-- **Files:** `Assets/Scripts/Game/GameFlowController.cs`
-- **Test:** State transitions log to console, can cycle through all states
+### F3.1 — Fix glyph mapping to accept all Arcade piece types
+- [ ] Restore mapping: glyph 0=Forward, 1=TurnLeft, 2=TurnRight, 3=Jump
+- [ ] Currently only glyph 0 (Forward) is accepted — all others are silently rejected
+- [ ] Verify pieces register correctly when placed/moved/lifted in simulator
+- **Files:** `Assets/Scripts/Game/RobotCommand.cs`
+- **Test:** Place each Arcade piece type → correct command appears in slot display
 
-### F5.2 — Title / start screen
-- [ ] Game name, "Place pieces to start" prompt
-- [ ] Detects first piece placement to begin
-- **Files:** `Assets/Scripts/UI/StartScreen.cs`
-- **Test:** Screen shows on launch, transitions to Instructions when piece detected
+### F3.2 — Add on-screen piece count & active piece list
+- [ ] Show "Pieces on board: N" live counter below the status display
+- [ ] List each active piece with its glyph type and assigned slot (if any)
+- [ ] Helps players understand which pieces the board sees
+- **Files:** `Assets/Scripts/UI/StatusDisplay.cs`, `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Place/lift pieces → counter updates in real time, piece list is accurate
 
-### F5.3 — Instructions screen
-- [ ] Shows current rule and brief explanation
-- [ ] "Sort the pieces!" call to action
-- [ ] Auto-advances or tap to dismiss
-- **Files:** `Assets/Scripts/UI/InstructionsScreen.cs`
-- **Test:** Instructions display clearly, transitions to Playing
+### F3.3 — Improve slot assignment feedback
+- [ ] When a piece is placed but NOT recognized (invalid glyph), show "Unknown piece" in nearest slot
+- [ ] When pieces outnumber required slots, show "Too many pieces!" warning
+- [ ] When a piece is lifted, immediately clear its slot visually
+- **Files:** `Assets/Scripts/Game/SequenceSlotManager.cs`, `Assets/Scripts/UI/SlotDisplay.cs`
+- **Test:** Place 4 pieces when only 1 needed → warning appears. Lift piece → slot clears instantly.
 
-### F5.4 — Result screen and round advancement
-- [ ] Shows "Correct!" or "Try again!" after validation
-- [ ] Advances to next rule after success
-- [ ] Shows final score after all rounds
-- **Files:** `Assets/Scripts/UI/ResultScreen.cs`
-- **Test:** After validation → result shows → can advance to next round
-
-### F5.5 — Check/submit trigger
-- [ ] Auto-validate when all 3 pieces are placed in zones
-- [ ] Or: validate after pieces are stationary for 3 seconds
-- **Files:** `Assets/Scripts/Game/GameFlowController.cs` (extend)
-- **Test:** Place 3 pieces → validation triggers automatically
+### F3.4 — Verify piece position tracking accuracy
+- [ ] Log piece screen positions vs expected slot regions each frame (debug mode)
+- [ ] Ensure X-position sorting correctly assigns leftmost piece to slot 0
+- [ ] Confirm moved pieces update their slot assignment in real time
+- **Files:** `Assets/Scripts/Game/SequenceSlotManager.cs`, `Assets/Scripts/Core/PieceTracker.cs`
+- **Test:** Move a piece from left to right → it swaps slot assignment. Console confirms positions.
 
 ---
 
-## F6: Two-Player Session
+## F4: Level 1 Finetune — Clear Instructions
 
-### F6.1 — BoardSession player detection
+### F4.1 — Add level-specific instruction text below level name
+- [ ] Each level gets a clear instruction string explaining what to do
+- [ ] Level 1: "Place 1 Forward piece to move the robot to the goal!"
+- [ ] Level 2: "Use Forward and Turn Right to navigate the L-shape!"
+- [ ] Show instruction between level name and status message
+- **Files:** `Assets/Scripts/Game/RoadBuilderLevels.cs`, `Assets/Scripts/UI/StatusDisplay.cs`, `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Each level displays a unique, readable instruction on screen
+
+### F4.2 — Add "How to Play" intro overlay on first launch
+- [ ] Full-screen semi-transparent overlay shown before Level 1 starts
+- [ ] Explains: "Place robot pieces on the board to program the robot's path"
+- [ ] Shows piece-to-command legend (which piece = which command)
+- [ ] Dismisses when first piece is placed on board
+- **Files:** `Assets/Scripts/UI/HowToPlayOverlay.cs` (new), `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Game starts → overlay visible → place piece → overlay dismisses → Level 1 begins
+
+### F4.3 — Add command legend to slot area
+- [ ] Small text below slot display showing piece color → command mapping
+- [ ] E.g. "Yellow=Forward | Purple=Turn Left | Orange=Turn Right | Pink=Jump"
+- [ ] Only show commands relevant to current level (Level 1 only shows Forward)
+- **Files:** `Assets/Scripts/UI/SlotDisplay.cs`, `Assets/Scripts/Game/RoadBuilderLevels.cs`
+- **Test:** Level 1 shows "Yellow = Forward". Level 4 also shows "Pink = Jump".
+
+### F4.4 — Improve success/failure messages with next-step guidance
+- [ ] Success: "Great job! Next level loading..." (with level name preview)
+- [ ] Failure: "The robot got stuck! Lift all pieces and try a different order."
+- [ ] Show which command caused failure (e.g., "Forward hit a wall at step 2")
+- **Files:** `Assets/Scripts/Core/RoadBuilderGameController.cs`, `Assets/Scripts/UI/StatusDisplay.cs`
+- **Test:** Fail → message names the problem. Succeed → message previews next level.
+
+---
+
+## F5: Level 1 Finetune — Movement Correctness
+
+### F5.1 — Validate Forward movement on Level 1 grid
+- [ ] Place 1 Forward piece → robot moves right one cell to Goal → success
+- [ ] Verify robot animation plays smoothly (no teleporting or jitter)
+- [ ] Confirm robot faces correct direction (Right) throughout
+- **Files:** `Assets/Scripts/Game/RobotSimulator.cs`, `Assets/Scripts/UI/GridRenderer.cs`
+- **Test:** Level 1: 1 Forward piece → robot slides right → "You did it!" appears
+
+### F5.2 — Validate Turn commands on Level 2 grid
+- [ ] Sequence: Forward → TurnRight → Forward reaches Goal at (1,1)
+- [ ] Robot visually rotates 90° when turning (rotation animation)
+- [ ] Confirm direction state updates correctly after each turn
+- **Files:** `Assets/Scripts/Game/RobotSimulator.cs`, `Assets/Scripts/UI/GridRenderer.cs`
+- **Test:** Level 2: Forward+TurnRight+Forward → robot navigates L-shape → success
+
+### F5.3 — Validate Jump mechanic on Level 4 grid
+- [ ] Sequence: Forward → Jump → reaches Goal at (3,0)
+- [ ] Jump animation shows bounce arc over gap cell
+- [ ] Robot does NOT stop on gap cell — jumps 2 cells
+- [ ] Wrong sequence (e.g., Forward+Forward) fails at gap → red flash
+- **Files:** `Assets/Scripts/Game/RobotSimulator.cs`, `Assets/Scripts/UI/GridRenderer.cs`
+- **Test:** Level 4: Forward+Jump → robot leaps gap → success. Forward+Forward → fails at gap.
+
+### F5.4 — Fix immediate re-trigger after failure
+- [ ] After failure, ensure game waits for ALL pieces to be lifted before accepting new input
+- [ ] Prevent partial re-arrangement from triggering another run mid-failure-message
+- [ ] Add brief cooldown (0.5s) after failure before re-enabling piece detection
+- **Files:** `Assets/Scripts/Core/RoadBuilderGameController.cs`, `Assets/Scripts/Game/SequenceSlotManager.cs`
+- **Test:** Fail → lift 1 piece, place it back → does NOT re-trigger. Lift all, re-place → runs.
+
+### F5.5 — Validate command sequence order matches physical layout
+- [ ] Leftmost piece on board = first command executed
+- [ ] Moving pieces to rearrange order correctly updates sequence
+- [ ] Debug log the full sequence before running: "Sequence: [Forward, TurnRight, Forward]"
+- **Files:** `Assets/Scripts/Game/SequenceSlotManager.cs`, `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Swap two pieces physically → sequence order changes → different result
+
+---
+
+## F6: Validation & Feedback
+
+### F6.1 — Visual feedback (correct/incorrect)
+- [ ] Green flash + celebration for correct solution
+- [ ] Red flash + shake for incorrect — highlight the cell where robot stopped
+- [ ] Per-step trail: color cells the robot visited (green=good, red=stopped)
+- **Files:** `Assets/Scripts/UI/GridRenderer.cs`, `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Success → green trail + goal highlight. Failure → red trail to failure point.
+
+### F6.2 — Audio feedback
+- [ ] Correct sound effect on valid solution
+- [ ] Incorrect sound effect on failure
+- [ ] Step sound as robot moves each cell
+- **Files:** `Assets/Scripts/Core/RoadBuilderGameController.cs`, `Assets/Resources/Audio/`
+- **Test:** Sounds play at correct moments
+
+---
+
+## F7: Game Flow & Progression
+
+### F7.1 — Title / start screen
+- [ ] Game name "Robot Road Builder", "Place pieces to start!" prompt
+- [ ] Detects first piece placement to begin Level 1
+- **Files:** `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Screen shows on launch, transitions when piece detected
+
+### F7.2 — Level progression with unlock state
+- [ ] Complete level → unlock next
+- [ ] Persist unlock state via PlayerPrefs
+- [ ] Show "All levels complete!" celebration after Level 5
+- **Files:** `Assets/Scripts/Core/RoadBuilderGameController.cs`
+- **Test:** Complete Level 1 → Level 2 unlocks. Restart → state persists.
+
+---
+
+## F8: Two-Player Session & Logging
+
+### F8.1 — BoardSession player detection
 - [ ] Read `BoardSession.players` on start
-- [ ] Assign player IDs (or fallback to "player_1"/"player_2" in simulator)
-- **Files:** `Assets/Scripts/Core/PlayerManager.cs`
+- [ ] Assign player IDs (fallback to "player_1"/"player_2" in simulator)
+- **Files:** `Assets/Scripts/Core/BoardSetup.cs`
 - **Test:** Console logs detected players on scene start
 
-### F6.2 — Player attribution for piece actions
-- [ ] Track which player placed/moved each piece (via `isTouched` + finger proximity)
-- [ ] Display player info on HUD
-- **Files:** `Assets/Scripts/Core/PlayerManager.cs` (extend), `Assets/Scripts/UI/GameHUD.cs`
-- **Test:** Each piece placement attributed to a specific player
-
----
-
-## F7: Interaction Logging
-
-### F7.1 — Wire CSV logger to piece events
-- [ ] Log piece placed, moved, rotated, lifted events from PieceTracker
-- [ ] Include: timestamp, session_id, player_id, piece_id (glyphId), action, position, rotation, game_state
+### F8.2 — CSV interaction logger
+- [ ] Log: timestamp, session_id, player_id, piece_id, action, position, rotation, game_state
+- [ ] Log game flow events: level_start, level_complete, validation_pass/fail
 - **Files:** `Assets/Scripts/Logging/InteractionLogger.cs`
 - **Test:** Play one round → CSV file exists with correct schema and data
-
-### F7.2 — Log game flow events
-- [ ] Log level_start, level_complete, rule_shown, validation_pass, validation_fail
-- [ ] Include level_id and concept_type columns
-- **Files:** `Assets/Scripts/Logging/InteractionLogger.cs` (extend)
-- **Test:** CSV contains both piece events and game flow events
-
----
-
-## F8: Levels & Progression
-
-### F8.1 — Level data structure
-- [ ] ScriptableObject with: level_id, rule, difficulty, unlock requirement
-- [ ] Create 5 levels with increasing difficulty
-- **Files:** `Assets/Scripts/Game/LevelData.cs`, `Assets/Resources/Levels/Level_01.asset` through `Level_05.asset`
-- **Test:** Levels load from Resources, each has distinct rule
-
-### F8.2 — Level select screen
-- [ ] Grid of level buttons showing name + locked/unlocked state
-- [ ] Tap to start a level
-- **Files:** `Assets/Scripts/UI/LevelSelectScreen.cs`
-- **Test:** Screen shows 5 levels, locked levels are grayed out, tapping unlocked level starts it
-
-### F8.3 — Progression and unlock logic
-- [ ] Complete a level → unlock the next
-- [ ] Persist unlock state via PlayerPrefs
-- **Files:** `Assets/Scripts/Game/ProgressionManager.cs`
-- **Test:** Complete level 1 → level 2 unlocks. Restart app → unlock state persists.
 
 ---
 
@@ -192,8 +244,8 @@ Players sort pieces into LEFT/RIGHT zones based on IF/THEN rules.
 
 ### F9.1 — Board Pause Screen integration
 - [ ] Wire `BoardApplication.SetPauseScreenContext` with restart button
-- **Files:** `Assets/Scripts/Core/BoardSetup.cs` (extend)
-- **Test:** Pause screen shows on Board with game name and restart option
+- **Files:** `Assets/Scripts/Core/BoardSetup.cs`
+- **Test:** Pause screen shows with game name and restart option
 
 ### F9.2 — End-to-end simulator test
 - [ ] Play through all 5 levels in Board Simulator
@@ -208,4 +260,4 @@ Players sort pieces into LEFT/RIGHT zones based on IF/THEN rules.
 
 ### F9.4 — Record demo video
 - [ ] 1–2 minute video showing collaborative gameplay
-- **Test:** Video shows two players sorting pieces, correct/incorrect feedback, level progression
+- **Test:** Video shows two players programming robot, level progression
