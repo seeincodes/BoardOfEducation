@@ -60,7 +60,7 @@ namespace BoardOfEducation.Core
 #endif
         }
 
-        private void OnPauseButton(string buttonId)
+        private void OnPauseButton(string buttonId, Board.Core.BoardPauseAudioTrack[] audioTracks)
         {
             if (buttonId == "restart")
             {

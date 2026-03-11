@@ -31,8 +31,25 @@ namespace BoardOfEducation.Core
         private readonly Dictionary<int, TrackedPiece> _activePieces = new();
         private readonly List<int> _toRemove = new();
 
+        [SerializeField] private bool debugLogAllContacts = true;
+        private float _nextDebugLog;
+
         private void Update()
         {
+            // Debug: log ALL contact types so we can see what the simulator produces
+            if (debugLogAllContacts && Time.time > _nextDebugLog)
+            {
+                var all = BoardInput.GetActiveContacts(
+                    BoardContactType.Glyph, BoardContactType.Finger, BoardContactType.Blob);
+                if (all != null && all.Length > 0)
+                {
+                    foreach (var c in all)
+                        Debug.Log($"[PieceTracker] Contact: type={c.type} id={c.contactId} glyph={c.glyphId} phase={c.phase} pos={c.screenPosition}");
+                    _nextDebugLog = Time.time + 1f; // throttle to once per second
+                }
+            }
+
+            // Track glyph contacts for game logic
             var contacts = BoardInput.GetActiveContacts(BoardContactType.Glyph);
             var seen = new HashSet<int>();
 
@@ -50,6 +67,8 @@ namespace BoardOfEducation.Core
                     Phase = contact.phase
                 };
 
+                bool isNew = !_activePieces.ContainsKey(contact.contactId);
+
                 switch (contact.phase)
                 {
                     case BoardContactPhase.Began:
@@ -60,7 +79,9 @@ namespace BoardOfEducation.Core
                     case BoardContactPhase.Moved:
                     case BoardContactPhase.Stationary:
                         _activePieces[contact.contactId] = piece;
-                        if (contact.phase == BoardContactPhase.Moved)
+                        if (isNew)
+                            OnPiecePlaced?.Invoke(piece); // handle pieces that skip Began
+                        else if (contact.phase == BoardContactPhase.Moved)
                             OnPieceMoved?.Invoke(piece);
                         break;
 
