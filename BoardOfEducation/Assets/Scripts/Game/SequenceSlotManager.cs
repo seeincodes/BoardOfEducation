@@ -114,23 +114,37 @@ namespace BoardOfEducation.Game
             // Debug logging every second
             if (Time.time > _nextDebugLog)
             {
-                Debug.Log($"[SlotManager] Active pieces on board: {_pieceTracker.ActivePieces.Count} total, {commandPieces.Count} robot commands");
-                foreach (var p in commandPieces)
+                Debug.Log($"[SlotManager] Pieces: {allPieces.Count} total ({commandPieces.Count} valid, {allPieces.Count - commandPieces.Count} unknown, {_excessPieceCount} excess)");
+
+                // Log each piece with position and assigned slot
+                for (int p = 0; p < allPieces.Count; p++)
                 {
-                    CommandMapping.TryGetCommand(p.GlyphId, out var cmd);
-                    Debug.Log($"[SlotManager]   glyph={p.GlyphId} ({CommandMapping.GetCommandName(cmd)}) pos=({p.ScreenPosition.x:F0},{p.ScreenPosition.y:F0})");
+                    var piece = allPieces[p];
+                    string cmdStr = CommandMapping.TryGetCommand(piece.GlyphId, out var cmd)
+                        ? CommandMapping.GetCommandName(cmd)
+                        : $"Unknown({piece.GlyphId})";
+                    string slotStr = p < _slotCount ? $"-> Slot {p}" : "-> EXCESS";
+                    Debug.Log($"[SlotManager]   [{p}] glyph={piece.GlyphId} ({cmdStr}) x={piece.ScreenPosition.x:F0} y={piece.ScreenPosition.y:F0} {slotStr}");
                 }
 
-                var sb = new System.Text.StringBuilder("[SlotManager] Slots: ");
-                for (int j = 0; j < _slotCount; j++)
+                // Log slot regions for reference
+                if (_slotRects != null)
                 {
-                    if (_slotGlyphIds[j] >= 0 && CommandMapping.TryGetCommand(_slotGlyphIds[j], out var dbgCmd))
-                        sb.Append($"[{j}]={CommandMapping.GetCommandName(dbgCmd)} ");
-                    else
-                        sb.Append($"[{j}]=empty ");
+                    var sb = new System.Text.StringBuilder("[SlotManager] Slot regions: ");
+                    for (int j = 0; j < _slotCount; j++)
+                    {
+                        string content;
+                        if (_slotGlyphIds[j] >= 0 && CommandMapping.TryGetCommand(_slotGlyphIds[j], out var dbgCmd))
+                            content = CommandMapping.GetCommandName(dbgCmd);
+                        else if (_slotGlyphIds[j] == UnknownGlyph)
+                            content = "UNKNOWN";
+                        else
+                            content = "empty";
+                        sb.Append($"[{j}] x={_slotRects[j].x:F0}-{_slotRects[j].xMax:F0} ={content}  ");
+                    }
+                    Debug.Log(sb.ToString());
                 }
-                sb.Append($"| need={_slotCount} have={commandPieces.Count}");
-                Debug.Log(sb.ToString());
+
                 _nextDebugLog = Time.time + 1f;
             }
 

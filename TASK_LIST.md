@@ -124,9 +124,9 @@ Arcade pieces to program a robot's path through grid levels.
 
 ### F3.4 — Verify piece position tracking accuracy
 
-- [ ] Log piece screen positions vs expected slot regions each frame (debug mode)
-- [ ] Ensure X-position sorting correctly assigns leftmost piece to slot 0
-- [ ] Confirm moved pieces update their slot assignment in real time
+- [x] Log piece screen positions vs expected slot regions each frame (debug mode)
+- [x] Ensure X-position sorting correctly assigns leftmost piece to slot 0
+- [x] Confirm moved pieces update their slot assignment in real time
 - **Files:** `Assets/Scripts/Game/SequenceSlotManager.cs`, `Assets/Scripts/Core/PieceTracker.cs`
 - **Test:** Move a piece from left to right → it swaps slot assignment. Console confirms positions.
 
