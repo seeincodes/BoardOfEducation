@@ -123,7 +123,7 @@ namespace BoardOfEducation.Editor
 
         private static void EnsureSceneBootstrapped()
         {
-            // Check if SortingGameBootstrap exists in the scene
+            // Check if RoadBuilderBootstrap exists in the scene
             var scenePath = "Assets/Scenes/SortingGame.unity";
             if (!File.Exists(scenePath))
                 scenePath = "Assets/Scenes/Game.unity";
@@ -131,7 +131,7 @@ namespace BoardOfEducation.Editor
             var hasBootstrap = false;
             foreach (var go in gameScene.GetRootGameObjects())
             {
-                if (go.GetComponent<BoardOfEducation.Core.SortingGameBootstrap>() != null)
+                if (go.GetComponent<BoardOfEducation.Core.RoadBuilderBootstrap>() != null)
                 {
                     hasBootstrap = true;
                     break;
@@ -139,9 +139,9 @@ namespace BoardOfEducation.Editor
             }
             if (!hasBootstrap)
             {
-                Debug.Log("[BoardBuild] Scene missing SortingGameBootstrap — adding it...");
+                Debug.Log("[BoardBuild] Scene missing RoadBuilderBootstrap — adding it...");
                 var bootstrapGo = new UnityEngine.GameObject("Bootstrap");
-                bootstrapGo.AddComponent<BoardOfEducation.Core.SortingGameBootstrap>();
+                bootstrapGo.AddComponent<BoardOfEducation.Core.RoadBuilderBootstrap>();
                 EditorSceneManager.SaveScene(gameScene);
             }
         }

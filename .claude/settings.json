@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls BoardOfEducation/Assets/Resources/Levels/*.asset)"
+      "Bash(ls BoardOfEducation/Assets/Resources/Levels/*.asset)",
+      "mcp__coplay-mcp__read_file"
     ]
   }
 }

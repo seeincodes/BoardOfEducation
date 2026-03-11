@@ -8,24 +8,24 @@ Players sort pieces into LEFT/RIGHT zones based on IF/THEN rules.
 ## F1: Clean Scene & Board SDK Wiring
 
 ### F1.1 — Create minimal game scene with correct Canvas/EventSystem setup
-- [ ] New scene with Canvas (ScreenSpaceOverlay, 1920x1080, match 0.5) + EventSystem
+- [x] New scene with Canvas (ScreenSpaceOverlay, 1920x1080, match 0.5) + EventSystem
 - **Files:** `Assets/Scenes/SortingGame.unity`
 - **Test:** Scene opens in Unity with no errors
 
 ### F1.2 — BoardUIInputModule setup script
-- [ ] Script that adds BoardUIInputModule to EventSystem at runtime, disables StandaloneInputModule
+- [x] Script that adds BoardUIInputModule to EventSystem at runtime, disables StandaloneInputModule
 - **Files:** `Assets/Scripts/Core/BoardSetup.cs`
 - **Test:** Play scene → console logs "BoardUIInputModule active" (or equivalent)
 
 ### F1.3 — Piece detection polling loop
-- [ ] Script that polls `BoardInput.GetActiveContacts(BoardContactType.Glyph)` every frame
-- [ ] Track piece lifecycle: Began, Moved/Stationary, Ended
-- [ ] Store active pieces in a dictionary keyed by contactId
+- [x] Script that polls `BoardInput.GetActiveContacts(BoardContactType.Glyph)` every frame
+- [x] Track piece lifecycle: Began, Moved/Stationary, Ended
+- [x] Store active pieces in a dictionary keyed by contactId
 - **Files:** `Assets/Scripts/Core/PieceTracker.cs`
 - **Test:** Place Arcade piece on Board → PieceTracker reports it in console
 
 ### F1.4 — Debug overlay showing detected pieces
-- [ ] On-screen text showing each detected piece's glyphId, position, orientation, phase
+- [x] On-screen text showing each detected piece's glyphId, position, orientation, phase
 - **Files:** `Assets/Scripts/UI/DebugOverlay.cs`
 - **Test:** Place/move/lift pieces → overlay updates in real time
 
@@ -34,20 +34,20 @@ Players sort pieces into LEFT/RIGHT zones based on IF/THEN rules.
 ## F2: Zone System
 
 ### F2.1 — Define LEFT and RIGHT zone data
-- [ ] Simple class holding zone name, screen-space bounds (Rect), and color
+- [x] Simple class holding zone name, screen-space bounds (Rect), and color
 - **Files:** `Assets/Scripts/Game/SortingZone.cs`
 - **Test:** Compiles, can instantiate two zones with different bounds
 
 ### F2.2 — Zone manager maps pieces to zones
-- [ ] Consumes PieceTracker's active pieces each frame
-- [ ] Determines which zone (if any) each piece is in based on screen position
-- [ ] Fires events: OnPieceEnteredZone, OnPieceLeftZone
+- [x] Consumes PieceTracker's active pieces each frame
+- [x] Determines which zone (if any) each piece is in based on screen position
+- [x] Fires events: OnPieceEnteredZone, OnPieceLeftZone
 - **Files:** `Assets/Scripts/Game/ZoneManager.cs`
 - **Test:** Place piece on left half of Board → ZoneManager reports LEFT zone
 
 ### F2.3 — Zone visual rendering
-- [ ] Draw colored rectangles on canvas for LEFT and RIGHT zones
-- [ ] Highlight zone when a piece is inside it
+- [x] Draw colored rectangles on canvas for LEFT and RIGHT zones
+- [x] Highlight zone when a piece is inside it
 - **Files:** `Assets/Scripts/UI/ZoneDisplay.cs`
 - **Test:** Two colored zones visible on screen, zone lights up when piece enters
 
@@ -56,20 +56,20 @@ Players sort pieces into LEFT/RIGHT zones based on IF/THEN rules.
 ## F3: Rule Engine
 
 ### F3.1 — Sorting rule data structure
-- [ ] Class holding: rule text, target glyphIds for LEFT zone, target glyphIds for RIGHT zone
-- [ ] Support simple IF condition (e.g., "IF piece is ▲ → LEFT, ELSE → RIGHT")
+- [x] Class holding: rule text, target glyphIds for LEFT zone, target glyphIds for RIGHT zone
+- [x] Support simple IF condition (e.g., "IF piece is ▲ → LEFT, ELSE → RIGHT")
 - **Files:** `Assets/Scripts/Game/SortingRule.cs`
 - **Test:** Can create a rule and query "where should glyphId X go?"
 
 ### F3.2 — Rule set with 3 starter rules
-- [ ] A collection of 3 hardcoded rules using real Arcade glyphIds
-- [ ] Method to get next rule / random rule
+- [x] A collection of 3 hardcoded rules using real Arcade glyphIds
+- [x] Method to get next rule / random rule
 - **Files:** `Assets/Scripts/Game/RuleSet.cs`
 - **Test:** RuleSet returns 3 distinct rules with valid glyphIds
 
 ### F3.3 — Rule display UI
-- [ ] Show current rule on screen in kid-friendly text (age 6+)
-- [ ] Large, readable font with piece icons/names
+- [x] Show current rule on screen in kid-friendly text (age 6+)
+- [x] Large, readable font with piece icons/names
 - **Files:** `Assets/Scripts/UI/RuleDisplay.cs`
 - **Test:** Rule text visible and readable on Board screen
 
