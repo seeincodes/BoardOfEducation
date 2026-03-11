@@ -86,9 +86,9 @@ Arcade pieces to program a robot's path through grid levels.
 ## F3: Level 1 Finetune — Piece Tracking & Board Objects
 
 ### F3.1 — Fix glyph mapping to accept all Arcade piece types
-- [ ] Restore mapping: glyph 0=Forward, 1=TurnLeft, 2=TurnRight, 3=Jump
-- [ ] Currently only glyph 0 (Forward) is accepted — all others are silently rejected
-- [ ] Verify pieces register correctly when placed/moved/lifted in simulator
+- [x] Restore mapping: glyph 0=Forward, 1=TurnLeft, 2=TurnRight, 3=Jump
+- [x] Currently only glyph 0 (Forward) is accepted — all others are silently rejected
+- [x] Verify pieces register correctly when placed/moved/lifted in simulator
 - **Files:** `Assets/Scripts/Game/RobotCommand.cs`
 - **Test:** Place each Arcade piece type → correct command appears in slot display
 

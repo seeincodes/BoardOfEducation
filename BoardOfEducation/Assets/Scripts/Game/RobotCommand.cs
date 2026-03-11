@@ -12,14 +12,14 @@ namespace BoardOfEducation.Game
         /// </summary>
         public static bool TryGetCommand(int glyphId, out RobotCommand command)
         {
-            // Only glyph 0 (Robot Yellow) is used — always maps to Forward
-            if (glyphId == 0)
+            switch (glyphId)
             {
-                command = RobotCommand.Forward;
-                return true;
+                case 0: command = RobotCommand.Forward;   return true;
+                case 1: command = RobotCommand.TurnLeft;  return true;
+                case 2: command = RobotCommand.TurnRight; return true;
+                case 3: command = RobotCommand.Jump;      return true;
+                default: command = default; return false;
             }
-            command = default;
-            return false;
         }
 
         public static string GetCommandName(RobotCommand cmd)
