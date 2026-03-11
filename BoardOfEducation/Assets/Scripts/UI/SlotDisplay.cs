@@ -19,6 +19,7 @@ namespace BoardOfEducation.UI
 
         private static readonly Color EmptySlotColor = new Color(0.4f, 0.4f, 0.5f, 0.4f);
         private static readonly Color FilledSlotColor = new Color(0.3f, 0.8f, 0.4f, 0.6f);
+        private static readonly Color UnknownSlotColor = new Color(0.9f, 0.6f, 0.2f, 0.6f);
 
         // Piece icon resource names, indexed by glyph ID
         private static readonly string[] PieceIconNames = { "RobotYellow", "RobotPurple", "RobotOrange", "RobotPink" };
@@ -199,17 +200,40 @@ namespace BoardOfEducation.UI
                 if (glyphs[i] >= 0 && CommandMapping.TryGetCommand(glyphs[i], out var cmd))
                 {
                     _slotLabels[i].text = CommandMapping.GetCommandName(cmd);
+                    _slotLabels[i].color = Color.white;
                     _slotImages[i].color = FilledSlotColor;
+                    anyFilled = true;
+                }
+                else if (glyphs[i] == SequenceSlotManager.UnknownGlyph)
+                {
+                    _slotLabels[i].text = "Unknown\npiece";
+                    _slotLabels[i].color = new Color(1f, 0.7f, 0.3f);
+                    _slotImages[i].color = UnknownSlotColor;
                     anyFilled = true;
                 }
                 else
                 {
                     _slotLabels[i].text = "";
+                    _slotLabels[i].color = Color.white;
                     _slotImages[i].color = EmptySlotColor;
                 }
             }
 
-            _instructionText.text = anyFilled ? "" : "Place robot pieces here!";
+            // Show warning or instruction
+            if (_slotManager.ExcessPieceCount > 0)
+            {
+                _instructionText.text = "Too many pieces! Remove some.";
+                _instructionText.color = new Color(1f, 0.4f, 0.3f);
+            }
+            else if (anyFilled)
+            {
+                _instructionText.text = "";
+            }
+            else
+            {
+                _instructionText.text = "Place robot pieces here!";
+                _instructionText.color = new Color(1, 1, 1, 0.5f);
+            }
         }
 
         public void Cleanup()

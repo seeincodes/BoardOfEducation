@@ -13,11 +13,14 @@ namespace BoardOfEducation.Game
     /// </summary>
     public class SequenceSlotManager : MonoBehaviour
     {
+        public const int UnknownGlyph = -2; // slot has an unrecognized piece
+
         private PieceTracker _pieceTracker;
         private int _slotCount;
-        private int[] _slotGlyphIds; // -1 = empty
+        private int[] _slotGlyphIds; // -1 = empty, -2 = unknown piece
         private bool _wasFilled;
         private float _nextDebugLog;
+        private int _excessPieceCount; // pieces beyond slot count
 
         // Visual slot rects (for SlotDisplay rendering only)
         private Rect[] _slotRects;
@@ -27,6 +30,7 @@ namespace BoardOfEducation.Game
 
         public int SlotCount => _slotCount;
         public Rect[] SlotRects => _slotRects;
+        public int ExcessPieceCount => _excessPieceCount;
 
         public void Initialize(PieceTracker pieceTracker, int slotCount)
         {
@@ -67,36 +71,45 @@ namespace BoardOfEducation.Game
         {
             if (_pieceTracker == null) return;
 
-            // Collect ALL valid robot command pieces anywhere on the board
-            var commandPieces = new List<PieceTracker.TrackedPiece>();
+            // Collect ALL pieces on the board (valid and invalid)
+            var allPieces = new List<PieceTracker.TrackedPiece>();
             foreach (var kvp in _pieceTracker.ActivePieces)
-            {
-                if (CommandMapping.TryGetCommand(kvp.Value.GlyphId, out _))
-                    commandPieces.Add(kvp.Value);
-            }
+                allPieces.Add(kvp.Value);
 
             // Sort by X position (leftmost = slot 0)
-            commandPieces.Sort((a, b) => a.ScreenPosition.x.CompareTo(b.ScreenPosition.x));
+            allPieces.Sort((a, b) => a.ScreenPosition.x.CompareTo(b.ScreenPosition.x));
 
             // Reset slots
             for (int i = 0; i < _slotCount; i++)
                 _slotGlyphIds[i] = -1;
 
-            // Assign pieces to slots in order
-            bool allFilled = true;
+            // Assign pieces to slots in order; unknown glyphs get UnknownGlyph marker
+            bool allFilledValid = true;
             bool anyFilled = false;
+            int assignCount = Mathf.Min(allPieces.Count, _slotCount);
             for (int i = 0; i < _slotCount; i++)
             {
-                if (i < commandPieces.Count)
+                if (i < allPieces.Count)
                 {
-                    _slotGlyphIds[i] = commandPieces[i].GlyphId;
+                    bool valid = CommandMapping.TryGetCommand(allPieces[i].GlyphId, out _);
+                    _slotGlyphIds[i] = valid ? allPieces[i].GlyphId : UnknownGlyph;
                     anyFilled = true;
+                    if (!valid) allFilledValid = false;
                 }
                 else
                 {
-                    allFilled = false;
+                    allFilledValid = false;
                 }
             }
+
+            _excessPieceCount = Mathf.Max(0, allPieces.Count - _slotCount);
+
+            // For event purposes, count only valid command pieces
+            var commandPieces = new List<PieceTracker.TrackedPiece>();
+            foreach (var p in allPieces)
+                if (CommandMapping.TryGetCommand(p.GlyphId, out _))
+                    commandPieces.Add(p);
+            bool allFilled = allFilledValid && assignCount >= _slotCount;
 
             // Debug logging every second
             if (Time.time > _nextDebugLog)
